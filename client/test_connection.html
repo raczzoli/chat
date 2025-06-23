@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>WebSocket Test</title>
+</head>
+<body>
+  <h1>WebSocket Test Page</h1>
+  <p id="status">Connecting...</p>
+  <script>
+    const status = document.getElementById("status");
+
+    const socket = new WebSocket("ws://localhost:8081");
+
+    socket.onopen = function() {
+      status.textContent = "Connected to WebSocket server!";
+      socket.send("Hello from the browser!");
+    };
+
+    socket.onmessage = function(event) {
+      console.log("Message from server:", event.data);
+    };
+
+    socket.onerror = function(error) {
+      status.textContent = "WebSocket error!";
+      console.error("WebSocket error:", error);
+    };
+
+    socket.onclose = function() {
+      status.textContent = "Connection closed.";
+    };
+  </script>
+</body>
+</html>
