@@ -21,9 +21,18 @@ typedef struct wss_client {
 	socklen_t addr_len;
 	char ip[INET_ADDRSTRLEN];
 	int port;
+	struct http_header **headers;
+	int headers_len;
 } wss_client_t;
+
+struct http_header {
+	char *key;
+	char *value;
+};
 
 wss_ctx_t *wss_create(struct wss_config config);
 struct wss_client *wss_accept(wss_ctx_t *server);
+
+void wss_free_client(wss_client_t *client);
 
 #endif
