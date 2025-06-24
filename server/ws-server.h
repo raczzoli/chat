@@ -16,14 +16,9 @@ typedef struct ws_server {
 	struct sockaddr_in addr;
 } ws_server_t;
 
-struct http_header {
-	char *key;
-	char *value;
-};
-
 ws_server_t *ws_server_create(struct ws_server_config config);
 ws_client_t *ws_server_accept(ws_server_t *server);
 
 void wss_free_client(ws_client_t *client);
 
-#endif
+#endif // WS_SERVER_H

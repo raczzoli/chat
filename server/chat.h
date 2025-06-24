@@ -3,4 +3,4 @@
 
 #define MAX_BUFFER_LEN 1024
 
-#endif
+#endif // CHAT_H
