@@ -14,7 +14,15 @@
 
     socket.onopen = function() {
       status.textContent = "Connected to WebSocket server!";
-      socket.send("Hello from the browser!");
+
+      // Create a JSON object to send
+      const payload = {
+        type: "text",
+        data: "Hello from the browser!"
+      };
+
+      // Send as JSON string
+      socket.send(JSON.stringify(payload));
     };
 
     socket.onmessage = function(event) {
