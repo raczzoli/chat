@@ -9,6 +9,7 @@
 
 static int parse_http_header(wss_client_t *client, char *buffer);
 static char *gen_resp_sec_key(char *req_key);
+static int handle_client_handshake(wss_client_t *client);
 
 wss_ctx_t *wss_create(struct wss_config config)
 {
@@ -71,10 +72,6 @@ err1:
 struct wss_client *wss_accept(wss_ctx_t *server)
 {
 	wss_client_t *client = NULL;
-	char buffer[MAX_BUFFER_LEN];
-	int bytes_read = 0;
-	char *wss_req_key;
-	char *wss_resp_key;
 	int ret = 0;
 
 	if (!server) {
@@ -100,31 +97,10 @@ struct wss_client *wss_accept(wss_ctx_t *server)
 	inet_ntop(AF_INET, &(client->addr.sin_addr), client->ip, INET_ADDRSTRLEN);
 	client->port = ntohs(client->addr.sin_port);
 
-	bytes_read = recv(client->fd, buffer, MAX_BUFFER_LEN - 1, 0);
-
-	if (bytes_read <= 0) {
-		fprintf(stderr, "Error reading handshake request from client or the client unexpectedly closed the connection (recv return value: %d)!\n", bytes_read);
-		goto err;
-	}
-
-	ret = parse_http_header(client, buffer);
+	ret = handle_client_handshake(client);
 
 	if (ret)
 		goto err;
-
-	for (int i=0;i<client->headers_len;i++) {
-		struct http_header *hdr = client->headers[i];
-
-		if (hdr->key && strstr(hdr->key, "Sec-WebSocket-Key") != NULL) {
-			wss_req_key = hdr->value;
-			break;
-		}
-	}
-
-	if (!wss_req_key) 
-		goto err;
-
-	wss_resp_key = gen_resp_sec_key(wss_req_key);
 
 	return client;
 
@@ -136,6 +112,44 @@ err:
 
 	return NULL;
 }
+
+static int handle_client_handshake(wss_client_t *client)
+{
+	int ret = 0;
+	int bytes_read = 0;
+	char buffer[MAX_BUFFER_LEN];
+	char *wss_req_key;
+	char *wss_resp_key;
+	
+	bytes_read = recv(client->fd, buffer, MAX_BUFFER_LEN - 1, 0);
+
+	if (bytes_read <= 0) {
+		fprintf(stderr, "Error reading handshake request from client or the client unexpectedly closed the connection (recv return value: %d)!\n", bytes_read);
+		return -1;
+	}
+
+	ret = parse_http_header(client, buffer);
+
+	if (ret)
+		return -1;
+
+	for (int i=0;i<client->headers_len;i++) {
+		struct http_header *hdr = client->headers[i];
+
+		if (hdr->key && strstr(hdr->key, "Sec-WebSocket-Key") != NULL) {
+			wss_req_key = hdr->value;
+			break;
+		}
+	}
+
+	if (!wss_req_key) 
+		return -1;
+
+	wss_resp_key = gen_resp_sec_key(wss_req_key);
+
+	return 0;
+}
+
 
 static int parse_http_header(wss_client_t *client, char *buffer)
 {
