@@ -3,12 +3,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <openssl/sha.h>
 
 #include "websocket.h"
 #include "base64.h"
 
 static int parse_http_header(wss_client_t *client, char *buffer);
-static char *gen_resp_sec_key(char *req_key);
 static int handle_client_handshake(wss_client_t *client);
 
 wss_ctx_t *wss_create(struct wss_config config)
@@ -107,7 +107,7 @@ struct wss_client *wss_accept(wss_ctx_t *server)
 err:
 	if (client) {
 		wss_free_client(client);
-		client = NULL;
+		// TODO: close socket (i think)
 	}
 
 	return NULL;
@@ -117,9 +117,12 @@ static int handle_client_handshake(wss_client_t *client)
 {
 	int ret = 0;
 	int bytes_read = 0;
+	int bytes_sent = 0;
 	char buffer[MAX_BUFFER_LEN];
 	char *wss_req_key;
-	char *wss_resp_key;
+	char wss_resp_key[1024];
+	unsigned char resp_key_hash[SHA_DIGEST_LENGTH];
+	char *resp_key_base64;
 	
 	bytes_read = recv(client->fd, buffer, MAX_BUFFER_LEN - 1, 0);
 
@@ -130,8 +133,10 @@ static int handle_client_handshake(wss_client_t *client)
 
 	ret = parse_http_header(client, buffer);
 
-	if (ret)
+	if (ret) {
+		fprintf(stderr, "Error parsing handshake request headers!\n");
 		return -1;
+	}
 
 	for (int i=0;i<client->headers_len;i++) {
 		struct http_header *hdr = client->headers[i];
@@ -145,11 +150,32 @@ static int handle_client_handshake(wss_client_t *client)
 	if (!wss_req_key) 
 		return -1;
 
-	wss_resp_key = gen_resp_sec_key(wss_req_key);
+	snprintf(wss_resp_key, sizeof(wss_resp_key), "%s%s", wss_req_key, WEBSOCKET_MAGIC);
+	SHA1((unsigned char *)wss_resp_key, strlen(wss_resp_key), resp_key_hash);
+
+	resp_key_base64 = base64_encode((const unsigned char *)resp_key_hash, SHA_DIGEST_LENGTH);
+
+	//printf("plain: %s\n", wss_resp_key);
+	//printf("base64: %s\n", resp_key_base64);
+
+	snprintf(buffer, MAX_BUFFER_LEN,
+		"HTTP/1.1 101 Switching Protocols\r\n"
+		"Upgrade: websocket\r\n"
+		"Connection: Upgrade\r\n"
+		"Sec-WebSocket-Accept: %s\r\n"
+		"\r\n", resp_key_base64);
+
+	free(resp_key_base64);
+
+	bytes_sent = send(client->fd, buffer, strlen(buffer), 0);
+
+	if (bytes_sent <= 0) {
+		fprintf(stderr, "Error sending handshake response to client (send() return code: %d)!\n", bytes_sent);
+		return -1;
+	}
 
 	return 0;
 }
-
 
 static int parse_http_header(wss_client_t *client, char *buffer)
 {
@@ -199,18 +225,6 @@ static int parse_http_header(wss_client_t *client, char *buffer)
 	}
 
 	return 0;
-}
-
-static char *gen_resp_sec_key(char *req_key)
-{
-	char *input = "hello world";
-    char *str = base64_encode(input);
-    if (str) {
-        printf("base64: %s\n", str);
-        free(str);
-    }
-
-	return NULL;
 }
 
 void wss_free_client(wss_client_t *client)

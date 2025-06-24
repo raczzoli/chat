@@ -5,6 +5,7 @@
 
 #define LISTEN_BACKLOG 128
 #define MAX_BUFFER_LEN 1024
+#define WEBSOCKET_MAGIC "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
 struct wss_config {
 	int port;
