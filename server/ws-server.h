@@ -19,6 +19,4 @@ typedef struct ws_server {
 ws_server_t *ws_server_create(struct ws_server_config config);
 ws_client_t *ws_server_accept(ws_server_t *server);
 
-void wss_free_client(ws_client_t *client);
-
 #endif // WS_SERVER_H

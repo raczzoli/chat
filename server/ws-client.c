@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "chat.h"
 #include "ws-client.h"
@@ -26,4 +27,10 @@ void ws_client_init(ws_client_t *client)
 			// TODO: add some read error callback
 		}
 	}
+}
+
+void ws_client_free(ws_client_t *client)
+{
+	free(client);
+	// TODO: free headers;
 }

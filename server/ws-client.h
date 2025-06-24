@@ -27,5 +27,7 @@ struct ws_client {
 };
 
 void ws_client_init(ws_client_t *client);
+void ws_client_free(ws_client_t *client);
+
 
 #endif // WS_CLIENT_H

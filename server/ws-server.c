@@ -107,7 +107,7 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 
 err:
 	if (client) {
-		wss_free_client(client);
+		ws_client_free(client);
 		// TODO: close socket (i think)
 	}
 
@@ -235,8 +235,3 @@ static int parse_http_headers(ws_client_t *client, char *buffer)
 	return 0;
 }
 
-void wss_free_client(ws_client_t *client)
-{
-	free(client);
-	// TODO: free headers;
-}
