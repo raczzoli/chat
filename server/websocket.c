@@ -8,7 +8,7 @@
 #include "websocket.h"
 #include "base64.h"
 
-static int parse_http_header(wss_client_t *client, char *buffer);
+static int parse_http_headers(wss_client_t *client, char *buffer);
 static int handle_client_handshake(wss_client_t *client);
 
 wss_ctx_t *wss_create(struct wss_config config)
@@ -131,7 +131,7 @@ static int handle_client_handshake(wss_client_t *client)
 		return -1;
 	}
 
-	ret = parse_http_header(client, buffer);
+	ret = parse_http_headers(client, buffer);
 
 	if (ret) {
 		fprintf(stderr, "Error parsing handshake request headers!\n");
@@ -150,6 +150,10 @@ static int handle_client_handshake(wss_client_t *client)
 	if (!wss_req_key) 
 		return -1;
 
+	/*
+	 * computing response Sec-WebSocket-Accept key:
+	 * Sec-WebSocket-Accept = base64(sha1(Sec-WebSocket-Key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"))
+	 */
 	snprintf(wss_resp_key, sizeof(wss_resp_key), "%s%s", wss_req_key, WEBSOCKET_MAGIC);
 	SHA1((unsigned char *)wss_resp_key, strlen(wss_resp_key), resp_key_hash);
 
@@ -177,7 +181,7 @@ static int handle_client_handshake(wss_client_t *client)
 	return 0;
 }
 
-static int parse_http_header(wss_client_t *client, char *buffer)
+static int parse_http_headers(wss_client_t *client, char *buffer)
 {
 	struct http_header *header;
 	char *line;
