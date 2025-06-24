@@ -7,7 +7,7 @@ LDFLAGS = -lpthread -lcrypto
 PROG = chat
 
 # Source files
-SRCS = main.c websocket.c base64.c
+SRCS = main.c ws-server.c ws-client.c base64.c
 OBJS = $(SRCS:.c=.o)
 
 # Default target
