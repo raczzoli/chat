@@ -11,7 +11,7 @@ struct chat_context *chat_ctx;
 int main()
 {
 
-	chat_ctx = chat_init();
+	chat_ctx = chat_create();
 
 	if (!chat_ctx)
 		return -1;
@@ -19,7 +19,7 @@ int main()
 	printf("Chat service created successfuly...\n");
 	printf("Awaiting client connections...\n");
 
-	chat_accept_connections(chat_ctx);
+	chat_init(chat_ctx);
 
 	return 0;
 }

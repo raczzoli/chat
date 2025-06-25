@@ -12,7 +12,7 @@ static void client_read(ws_client_t *client, struct ws_data *data);
 static void client_close(ws_client_t *client);
 
 
-struct chat_context *chat_init()
+struct chat_context *chat_create()
 {
 	struct ws_server_config config;
 	struct chat_context *ctx = NULL;
@@ -38,7 +38,7 @@ struct chat_context *chat_init()
 	return ctx;
 }
 
-void chat_accept_connections(struct chat_context *ctx)
+void chat_init(struct chat_context *ctx)
 {
 	int ret = 0;
 	ws_client_t *client = NULL;

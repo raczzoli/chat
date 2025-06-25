@@ -30,8 +30,8 @@ struct chat_context {
 	int clients_len;
 };
 
-struct chat_context *chat_init();
-void chat_accept_connections(struct chat_context *ctx);
+struct chat_context *chat_create();
+void chat_init(struct chat_context *ctx);
 
 void chat_free(struct chat_context *ctx);
 
