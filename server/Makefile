@@ -1,13 +1,13 @@
 # Compiler and flags
 CC = gcc
 CFLAGS = -std=gnu99 -Wall -Wextra -g
-LDFLAGS = -lpthread -lcrypto
+LDFLAGS = -lpthread -lcrypto -ljansson
 
 # Target executable
 PROG = chat
 
 # Source files
-SRCS = main.c ws-server.c ws-client.c base64.c
+SRCS = main.c chat.c ws-server.c ws-client.c base64.c
 OBJS = $(SRCS:.c=.o)
 
 # Default target
