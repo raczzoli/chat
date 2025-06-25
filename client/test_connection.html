@@ -10,30 +10,18 @@
   <script>
     const status = document.getElementById("status");
 
-    const socket = new WebSocket("ws://localhost:8081");
+    const socket = new WebSocket("ws://localhost:8080");
 
     socket.onopen = function() {
       status.textContent = "Connected to WebSocket server!";
 
       // Create a JSON object to send
-      const payload = {
-        type: "text",
-        data: ""
+      var payload = {
+		command: "connect",
+		params: {gender:"M", looking_for:"F", min_age:0, max_age:17}
       };
 
-	  payload.data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus porta dignissim dui et pretium. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Phasellus ac augue in ipsum venenatis bibendum at sed eros. Phasellus eu mi in libero porta feugiat vel eu quam. Praesent fermentum ante dui, ac congue sapien rutrum nec. Donec nec sollicitudin quam, ac vehicula quam. Etiam fringilla tortor sed est consequat dictum. In egestas augue nec metus venenatis, non posuere dui scelerisque. Curabitur nec laoreet tellus, in sollicitudin nisi.";
-
-	  /*
-	  for (i=0;i<70000;i++) {
-		payload.data += 'A';
-	  } 
-	  */
-
-	  const payload_json = JSON.stringify(payload);
-	  console.log(payload_json);
-	  console.log(payload_json.length);
-      // Send as JSON string
-      socket.send(payload_json);
+      socket.send(JSON.stringify(payload));
     };
 
     socket.onmessage = function(event) {
