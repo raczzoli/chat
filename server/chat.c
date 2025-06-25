@@ -17,7 +17,7 @@ struct chat_context *chat_create()
 	struct ws_server_config config;
 	struct chat_context *ctx = NULL;
 	
-	ctx = (struct chat_context *)malloc(sizeof(struct chat_context));
+	ctx = malloc(sizeof(struct chat_context));
 
 	if (!ctx) {
 		fprintf(stderr, "Error allocating memory for chat_context struct!\n");
@@ -47,7 +47,7 @@ void chat_init(struct chat_context *ctx)
 		client = ws_server_accept(ctx->server);
 
 		if (client) {
-			struct chat_client *c = (struct chat_client *)malloc(sizeof(struct chat_client));
+			struct chat_client *c = malloc(sizeof(struct chat_client));
 
 			if (!c) {
 				// TODO close client connection
