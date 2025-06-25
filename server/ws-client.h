@@ -3,6 +3,13 @@
 
 #include <arpa/inet.h>
 
+/*
+ * TODO: for the moment our max read buffer
+ * can be up to 70KB (payload len 126 = 65535 bytes)
+ */
+#define MAX_WS_BUFFER_LEN 71680 
+#define MAX_TEMP_PAYLOAD_LEN 65535
+
 typedef struct ws_client ws_client_t;
 
 struct http_header {
@@ -10,8 +17,15 @@ struct http_header {
 	char *value;
 };
 
+struct ws_data {
+	int type;
+	int is_text :1;
+	char *payload;
+	uint64_t payload_len;
+};
+
 struct ws_client_ops {
-	void (*read)(ws_client_t *client, char *data);
+	void (*read)(ws_client_t *client, struct ws_data *data);
 	void (*close)(ws_client_t *client);
 };
 
@@ -26,7 +40,15 @@ struct ws_client {
 	struct ws_client_ops ops;
 };
 
-void ws_client_init(ws_client_t *client);
+struct ws_frame {
+	int is_fin;
+	int opcode;
+	int is_masked;
+	uint64_t payload_len;
+	uint8_t masking_key[4];
+};
+
+int ws_client_init(ws_client_t *client);
 void ws_client_free(ws_client_t *client);
 
 

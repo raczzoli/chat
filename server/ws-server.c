@@ -87,6 +87,8 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 		return NULL;
 	}
 
+	client->headers = NULL;
+	client->headers_len = 0;
 	client->addr_len = sizeof(struct sockaddr_in);
 	client->fd = accept(server->fd, (struct sockaddr*)&client->addr, &client->addr_len);
 
@@ -213,7 +215,7 @@ static int parse_http_headers(ws_client_t *client, char *buffer)
 			// value
 			header->value = strndup(val, strlen(val));
 
-			if (!client->headers)
+			if (client->headers_len < 1)
 				client->headers = calloc(1, sizeof(struct http_header *));
 			else 
 				client->headers = realloc(client->headers, (client->headers_len+1) * sizeof(struct http_header *));

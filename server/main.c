@@ -5,7 +5,7 @@
 #include "ws-client.h"
 
 static void client_accepted(ws_client_t *client);
-static void client_read(ws_client_t *client, char *data);
+static void client_read(ws_client_t *client, struct ws_data *data);
 static void client_close(ws_client_t *client);
 
 int main()
@@ -35,16 +35,17 @@ int main()
 
 static void client_accepted(ws_client_t *client)
 {
+	printf("Client connected... IP: %s, port: %d\n", client->ip, client->port);
+
 	client->ops.read = client_read;
 	client->ops.close = client_close;
 
 	ws_client_init(client);
-	printf("Client connected... IP: %s, port: %d\n", client->ip, client->port);
 }
 
-static void client_read(ws_client_t *client, char *data)
+static void client_read(ws_client_t *client, struct ws_data *data)
 {
-	printf("Data from client IP: %s...\n", client->ip);
+	printf("Data from client IP: %s... payload len: %ld, data: %s\n", client->ip, data->payload_len, data->payload);
 	if (data) {
 		// dummy if to silence compiler for now
 	}
