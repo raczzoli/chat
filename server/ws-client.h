@@ -10,6 +10,7 @@
 #define MAX_WS_BUFFER_LEN 71680 
 #define MAX_TEMP_PAYLOAD_LEN 65535
 
+
 typedef struct ws_client ws_client_t;
 
 struct http_header {
@@ -38,6 +39,7 @@ struct ws_client {
 	struct http_header **headers;
 	int headers_len;
 	struct ws_client_ops ops;
+	void *owner;
 };
 
 struct ws_frame {
@@ -48,7 +50,7 @@ struct ws_frame {
 	uint8_t masking_key[4];
 };
 
-int ws_client_init(ws_client_t *client);
+int ws_client_handle(ws_client_t *client);
 void ws_client_free(ws_client_t *client);
 
 

@@ -3,12 +3,12 @@
 #include <string.h>
 #include <errno.h>
 
-#include "chat.h"
+#include "r89.h"
 #include "ws-client.h"
 
 static int parse_frame(struct ws_frame *frame, char **buffer);
 
-int ws_client_init(ws_client_t *client)
+int ws_client_handle(ws_client_t *client)
 {
 	int bytes_read = 0;
 	char buffer[MAX_WS_BUFFER_LEN];
