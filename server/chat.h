@@ -26,8 +26,7 @@ struct chat_client {
 struct chat_context {
 	ws_server_t *server;
 
-	struct chat_client **clients;
-	int clients_len;
+	struct list_node *clients_head;
 };
 
 struct chat_context *chat_create();

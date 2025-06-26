@@ -4,6 +4,7 @@
 
 #include "r89.h"
 #include "chat.h"
+#include "list.h"
 
 static int register_client(struct chat_context *ctx, struct chat_client *client);
 
@@ -23,9 +24,6 @@ struct chat_context *chat_create()
 		fprintf(stderr, "Error allocating memory for chat_context struct!\n");
 		return NULL;
 	}
-
-	ctx->clients = NULL;
-	ctx->clients_len = 0;
 
 	config.port = WS_PORT;
 	ctx->server = ws_server_create(config);
@@ -47,29 +45,29 @@ void chat_init(struct chat_context *ctx)
 		client = ws_server_accept(ctx->server);
 
 		if (client) {
-			struct chat_client *c = malloc(sizeof(struct chat_client));
+			struct chat_client *chat_cli = malloc(sizeof(struct chat_client));
 
-			if (!c) {
+			if (!chat_cli) {
 				// TODO close client connection
 				fprintf(stderr, "Error allocating memory for chat_client struct!\n");
 				return;
 			}
 
-			ret = register_client(ctx, c);
-			if (ret) {
-				// TODO close client connection
-				free(c);
-				return;
-			}
-
 			printf("Client registered - IP: %s, port: %d...\n", client->ip, client->port);
 
-			c->client = client;
-			c->chat_context = ctx;
+			chat_cli->client = client;
+			chat_cli->chat_context = ctx;
 
-			client->owner = (void *)c;
+			client->owner = (void *)chat_cli;
 			client->ops.read = client_read;
 			client->ops.close = client_close;
+
+			ret = register_client(ctx, chat_cli);
+			if (ret) {
+				// TODO close client connection
+				free(chat_cli);
+				return;
+			}
 
 			ws_client_handle(client);
 		}
@@ -81,7 +79,7 @@ static void client_read(ws_client_t *client, struct ws_data *data)
 	printf("Data from client IP: %s... payload len: %ld, data: %s\n", client->ip, data->payload_len, data->payload);
 
 	// test
-	struct chat_client *cc = (struct chat_client *)client->owner;
+	//struct chat_client *chat_cli = (struct chat_client *)client->owner;
 
 	//json_error_t error;
     //json_t *root = json_loads(json_text, 0, &error);
@@ -93,21 +91,15 @@ static void client_read(ws_client_t *client, struct ws_data *data)
 
 static int register_client(struct chat_context *ctx, struct chat_client *client)
 {
-	if (!ctx->clients) {
-		ctx->clients = calloc(CLIENTS_ALLOC_CHUNK, sizeof(struct chat_client *));
-	}
-	else if (ctx->clients_len % CLIENTS_ALLOC_CHUNK == 0) {
-		int size = ctx->clients_len + CLIENTS_ALLOC_CHUNK;
-		ctx->clients = realloc(ctx->clients, size * sizeof(struct chat_client *));
+	struct list_node *ret = list_add(&ctx->clients_head, client);
+
+	if (!ret) {
+		// TODO - maybe close the connection
+		fprintf(stderr, "Error adding client with IP: %s to clients list!\n", client->client->ip);
+		return -1;
 	}
 
-	if (!ctx->clients) {
-		fprintf(stderr, "Error allocating memory for clients array!\n");
-		return -ENOMEM;
-	}
-
-	ctx->clients[ctx->clients_len] = client;
-	ctx->clients_len++;
+	printf("Client with IP: %s added to clients list...\n", client->client->ip);
 
 	return 0;
 }
