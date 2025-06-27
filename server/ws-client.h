@@ -8,7 +8,7 @@
  * can be up to 70KB (payload len 126 = 65535 bytes)
  */
 #define MAX_WS_BUFFER_LEN 71680 
-#define MAX_TEMP_PAYLOAD_LEN 65535
+#define MAX_WS_PAYLOAD_LEN 65535
 
 
 typedef struct ws_client ws_client_t;
@@ -51,6 +51,9 @@ struct ws_frame {
 };
 
 int ws_client_handle(ws_client_t *client);
+
+int ws_client_write_text(ws_client_t *client, char *text, uint64_t len);
+
 void ws_client_free(ws_client_t *client);
 
 

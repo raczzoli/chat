@@ -7,26 +7,111 @@
 #include "ws-client.h"
 
 static int parse_frame(struct ws_frame *frame, char **buffer);
+static int ws_client_read(ws_client_t *client);
+
 
 int ws_client_handle(ws_client_t *client)
 {
+	int ret = ws_client_read(client);
+
+	if (ret)
+		return ret;
+
+	return 0;
+}
+
+int ws_client_write_text(ws_client_t *client, char *text, uint64_t len)
+{
+	int ret = 0;
+	char *buffer = NULL;
+	uint64_t buffer_len = 0;
+	int payload_len = 0;
+	int payload_extra_bytes = 0;
+	int payload_offset = 0;
+	ssize_t written = 0;
+
+	if (len <= 0) {
+		fprintf(stderr, "Invalid data length!\n");
+		return -EINVAL;
+	}
+
+	if (len <= 125) {
+		payload_len = len;
+	}
+	else if (len <= 65535) {
+		payload_len = 126;
+		payload_extra_bytes = 2;
+	}
+	else {
+		payload_len = 127;
+		payload_extra_bytes = 8;
+	}
+
+	/*
+	 * the offset the actual payload will start from in 
+	 * our buffer
+	 * 2 = the first two bytes of the frame (this is fixed and known)
+	 * payload_extra_bytes = the number of extra bytes depending on the len
+	 */
+	payload_offset += 2 + payload_extra_bytes;
+
+	buffer_len = payload_offset + len;
+
+	buffer = malloc(buffer_len);
+	memset(buffer, 0, buffer_len);
+
+	buffer[0] |= 0x81; // in bin: 10000001 (fin=1, rsv=000 opcode=0001(text))
+	buffer[1] |= 0x00 | payload_len; // 0x00 -> mask (in our case is 0) | payload_len
+
+	if (payload_extra_bytes > 0) {
+		for (int i = 0; i < payload_extra_bytes; i++) {
+			int shift = 8 * (payload_extra_bytes - 1 - i); // 8 for 2 bytes, 56 for 8 bytes
+			buffer[2 + i] = (len >> shift) & 0xFF;
+		}
+	}
+
+	memcpy(buffer+payload_offset, text, len);
+
+	written = send(client->fd, buffer, buffer_len, 0);
+
+	if (written < 0) {
+		fprintf(stderr, "Error writing bytes to client socket (code: %ld)!\n", written);
+		ret = written;
+		goto end;
+	}
+
+end:
+	free(buffer);
+
+	return ret;
+}
+
+static int ws_client_read(ws_client_t *client)
+{
 	int bytes_read = 0;
-	char buffer[MAX_WS_BUFFER_LEN];
-	char *buffer_ref = NULL;
+	char *buffer = NULL, *orig_buffer = NULL;
 	struct ws_frame frame;
 	struct ws_data data;
 	int ret = 0;
 
+	buffer = malloc(MAX_WS_BUFFER_LEN);
+
+	if (!buffer) {
+		fprintf(stderr, "Error allocating memory for websocket read buffer!\n");
+		return -ENOMEM;
+	}
+
+	orig_buffer = buffer;
+
 	while (1) {
-		buffer_ref = buffer;
 		bytes_read = recv(client->fd, buffer, MAX_WS_BUFFER_LEN, 0);
 
 		if (bytes_read > 0) {
-			ret = parse_frame(&frame, &buffer_ref);
+			ret = parse_frame(&frame, &buffer);
 
 			if (ret) {
 				// TODO: invalid frame... do something
-				return ret;
+				goto end;
 			}
 
 			switch(frame.opcode) {
@@ -45,15 +130,16 @@ int ws_client_handle(ws_client_t *client)
 					 * 2. handle continuation frames
 					 */
 					 
-					if (frame.opcode == 0x0 || frame.payload_len > MAX_TEMP_PAYLOAD_LEN) {
+					if (frame.opcode == 0x0 || frame.payload_len > MAX_WS_PAYLOAD_LEN) {
 						/*
 						 * since we don`t yet have proper handling of large payload data 
-						 * if we receive payload length greater than MAX_TEMP_PAYLOAD_LEN we 
+						 * if we receive payload length greater than MAX_WS_PAYLOAD_LEN we 
 						 * return here to avoid reading further (invalid for us) data chunks
 						 * from the client
 						 * TODO 2 - also we should close the connection for now
 						 */
-						return -EMSGSIZE;
+						ret = -EMSGSIZE;
+						goto end;
 					}
 
 					data.type = frame.opcode;
@@ -61,23 +147,25 @@ int ws_client_handle(ws_client_t *client)
 					data.payload_len = frame.payload_len;
 					data.payload = NULL;
 
-					printf("Final frame: %d, opcode is: %d, is masked: %d, payload len: %ld bytes\n", frame.is_fin, frame.opcode, frame.is_masked, frame.payload_len);
+					//printf("Final frame: %d, opcode is: %d, is masked: %d, payload len: %ld bytes\n", frame.is_fin, frame.opcode, frame.is_masked, frame.payload_len);
 
 					if (frame.payload_len > 0) {
 						data.payload = (char *) malloc(data.is_text ? frame.payload_len + 1 : frame.payload_len);
 						if (!data.payload) {
 							fprintf(stderr, "Error allocating memory for payload!\n");
-							return -ENOMEM;
+
+							ret = -ENOMEM;
+							goto end;
 						}
 					}
 
 					if (frame.is_masked > 0) {
 						for (uint64_t i=0;i<frame.payload_len;i++) {
-							data.payload[i] = buffer_ref[i] ^ frame.masking_key[i%4];
+							data.payload[i] = buffer[i] ^ frame.masking_key[i%4];
 						}
 					}
 					else {
-						memcpy(data.payload, buffer_ref, frame.payload_len);
+						memcpy(data.payload, buffer, frame.payload_len);
 					}
 
 					if (data.is_text)
@@ -119,7 +207,10 @@ int ws_client_handle(ws_client_t *client)
 		}
 	}
 
-	return 0;
+	end:
+		free(orig_buffer);
+
+	return ret;
 }
 
 static int parse_frame(struct ws_frame *frame, char **buffer)
@@ -167,7 +258,6 @@ static int parse_frame(struct ws_frame *frame, char **buffer)
 			* --------------------------------------------------------
 			*                                  00000001 00101100 = 300
 			*/
-			
 			if (len <= 125) {
 				// len is the actual payload length
 			}
