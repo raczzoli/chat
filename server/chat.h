@@ -19,6 +19,8 @@ struct chat_client {
 	
 	int gender;
 	int looking_for;
+
+	struct chat_client *pair;
 };
 
 struct chat_context {

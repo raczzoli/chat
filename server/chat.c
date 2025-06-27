@@ -10,8 +10,8 @@
 
 static int init_waiting_rooms(struct chat_context *ctx);
 static int register_client(struct chat_context *ctx, struct chat_client *client);
-static int find_match_or_add_to_waiting_queue(struct chat_client *client);
-static int add_client_to_waiting_room(struct chat_client *client, struct waiting_room *room);
+static struct chat_client *find_match(struct chat_context *ctx, struct chat_client *client);
+static int add_client_to_waiting_room(struct chat_context *ctx, struct chat_client *client);
 static int gender_string_to_int(const char *g);
 
 // websocket client callbacks
@@ -201,7 +201,7 @@ static void client_read(ws_client_t *client, struct ws_data *data)
 				!looking_for || !json_is_string(looking_for) ) {
 
 				fprintf(stderr, "Invalid \"gender\" and/or \"looking_for\" JSON keys!\n");
-				goto end;
+				goto register_err;
 			}
 
 			chat_client->gender = gender_string_to_int( json_string_value(gender) );
@@ -209,10 +209,28 @@ static void client_read(ws_client_t *client, struct ws_data *data)
 			
 			if (chat_client->gender < 1 || chat_client->looking_for < 1) {
 				fprintf(stderr, "Invalid gender and/or looking_for values in client data!\n");
-				goto end;
+				goto register_err;
 			}
 
-			find_match_or_add_to_waiting_queue(chat_client);
+			char *resp_str = "{\"command\":\"register-ok\"}";
+			ws_client_write_text(client, resp_str, strlen(resp_str));
+
+			struct chat_client *matched_cli = NULL;
+			if ((matched_cli = find_match(chat_client->chat_context, chat_client)) != NULL) {
+				matched_cli->pair = chat_client;
+				chat_client->pair = matched_cli;
+
+				printf("Match found between clients with IP-s: %s <=> %s...\n", matched_cli->client->ip, chat_client->client->ip);
+
+				char *resp_str = "{\"command\":\"match-found\"}";
+				int resp_str_len = strlen(resp_str);
+
+				ws_client_write_text(chat_client->client, resp_str, resp_str_len);
+				ws_client_write_text(matched_cli->client, resp_str, resp_str_len);
+			}
+			else {
+				add_client_to_waiting_room(chat_client->chat_context, chat_client);
+			}
 		}
 		else {
 			if (!chat_client->registered) {
@@ -225,6 +243,12 @@ static void client_read(ws_client_t *client, struct ws_data *data)
 			}
 		}
 	}
+
+	goto end;
+
+register_err:
+	char *resp_str = "{\"command\":\"register-err\"}";
+	ws_client_write_text(client, resp_str, strlen(resp_str));
 
 end:
 	if (root)
@@ -245,9 +269,33 @@ static int gender_string_to_int(const char *g)
 	return 0;
 }
 
-static int find_match_or_add_to_waiting_queue(struct chat_client *client)
+static struct chat_client *find_match(struct chat_context *ctx, struct chat_client *client)
 {
-	struct chat_context *ctx = client->chat_context;
+	struct waiting_room *room = NULL;
+
+	for (int i=0;i<ctx->waiting_rooms_len;i++) {
+		struct waiting_room *r = ctx->waiting_rooms[i];
+		if (r->gender == client->looking_for && r->looking_for == client->gender) {
+			room = r;
+			break;
+		}
+	}
+
+	if (!room || !room->queue)
+		return NULL;
+
+	// we have a match
+	struct chat_client *first_cli = room->queue->data;
+	list_remove(&room->queue, room->queue);
+
+	if (first_cli)
+		return first_cli;
+
+	return NULL;
+}
+
+static int add_client_to_waiting_room(struct chat_context *ctx, struct chat_client *client)
+{
 	struct waiting_room *room = NULL;
 
 	for (int i=0;i<ctx->waiting_rooms_len;i++) {
@@ -258,25 +306,9 @@ static int find_match_or_add_to_waiting_queue(struct chat_client *client)
 		}
 	}
 
-	if (!room) {
-		fprintf(stderr, "No waiting room for client criteria!\n");
+	if (!room)
 		return -1;
-	}
 
-	if (!room->queue) {
-		return add_client_to_waiting_room(client, room);
-	}
-	else {
-		struct chat_client *first_cli = room->queue->data;
-		list_remove(&room->queue, room->queue);
-	}
-	// search in queue
-
-	return 0;
-}
-
-static int add_client_to_waiting_room(struct chat_client *client, struct waiting_room *room)
-{
 	struct list_node *node = list_add(&room->queue, client);
 
 	if (!node) {
