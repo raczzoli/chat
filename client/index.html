@@ -31,7 +31,7 @@
       overflow: hidden;
     }
 
-    #step4.container-fullscreen {
+    #step5.container-fullscreen {
       background: #ffffff;
       width: 100vw !important;
       height: 100vh;
@@ -84,7 +84,7 @@
       box-shadow: 0 6px 14px rgba(37,99,235,0.6);
     }
 
-    #step4 {
+    #step5 {
       flex: 1;
       height: 100vh;
       display: flex;
@@ -104,9 +104,11 @@
     }
     #chatBox {
       flex: 1;
-      margin: 0 20px;
       background: #f9fafb;
+	  /*
+      margin: 0 20px;
       border-radius: 12px;
+	  */
       padding: 20px;
       overflow-y: auto;
       display: flex;
@@ -194,27 +196,34 @@
   <div class="container" id="step1">
     <h3>Válaszd ki a nemed:</h3>
     <div class="buttons">
-      <button onclick="nextStep(1, 'male')">Férfi</button>
-      <button onclick="nextStep(1, 'female')">Nő</button>
+      <button onclick="nextStep(1, 'M')">Férfi</button>
+      <button onclick="nextStep(1, 'F')">Nő</button>
     </div>
   </div>
 
   <div class="container" id="step2" style="display:none;">
     <h3>Kivel szeretnél beszélgetni?</h3>
     <div class="buttons">
-      <button onclick="nextStep(2, 'male')">Férfival</button>
-      <button onclick="nextStep(2, 'female')">Nővel</button>
+      <button onclick="nextStep(2, 'M')">Férfival</button>
+      <button onclick="nextStep(2, 'F')">Nővel</button>
     </div>
   </div>
 
   <div class="container" id="step3" style="display:none;">
     <div class="loading-box">
       <div class="loader"></div>
-      <span class="loading-text">Keresünk neked egy partnert...</span>
+      <span class="loading-text">Csatlakozás a szerverhez...</span>
     </div>
   </div>
 
-  <div class="container container-fullscreen" id="step4" style="display:none;">
+  <div class="container" id="step4" style="display:none;">
+    <div class="loading-box">
+      <div class="loader"></div>
+      <span class="loading-text">Sikeres csatlakozás.<br />Keresünk neked egy partnert...</span>
+    </div>
+  </div>
+
+  <div class="container container-fullscreen" id="step5" style="display:none;">
     <div id="chatHeader">Chat</div>
     <div id="chatBox"></div>
     <div id="inputContainer">
@@ -223,49 +232,112 @@
   </div>
 
 <script>
-  const user = {
-    gender: null,
-    targetGender: null
-  };
 
-  function nextStep(current, value) {
-    if (current === 1) user.gender = value;
-    else if (current === 2) user.targetGender = value;
+	var socket 	= null;
+	const URL 	= "ws://localhost:8080";
 
-    document.getElementById('step' + current).style.display = 'none';
-    const next = document.getElementById('step' + (current + 1));
-    next.style.display = 'flex';
+	var client = {
+		gender: "",
+		looking_for: ""
+	};
 
-    if (current === 2) {
-      console.log('Felhasználó beállításai:', user);
-      setTimeout(() => {
-        next.style.display = 'none';
-        document.getElementById('step4').style.display = 'flex';
-      }, 2000);
-    }
-  }
+	function connectToServer()
+	{
+		socket = new WebSocket(URL);
 
-  const chatInput = document.getElementById('chatInput');
-  const chatBox = document.getElementById('chatBox');
+		socket.onopen = function() {
+			sendToServer("register", client);
+		};
 
-  chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const msg = chatInput.value.trim();
-      if (msg.length > 0) {
-        appendMessage(msg, 'self');
-        chatInput.value = '';
-      }
-    }
-  });
+		socket.onmessage = function(event) {
+			if (!event.data) 
+			{
+				console.log(event);
+				return;
+			}
 
-  function appendMessage(text, sender) {
-    const div = document.createElement('div');
-    div.classList.add('message', sender);
-    div.textContent = (sender === 'self' ? 'Te: ' : 'Partner: ') + text;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
+			var data = JSON.parse(event.data);
+			switch(data.command)
+			{
+				case "register-ok":
+					nextStep(3, null);
+					break;
+				case "register-err":
+					alert("Sikertelen csatlakozás!");
+					document.location = document.location;
+					break;
+				case "match-found":
+					setTimeout(function(){
+						nextStep(4, null);
+					}, 1000);
+					break;
+			}
+			console.log("Message from server:", event.data);
+		};
+
+		socket.onerror = function(error) {
+			console.error("WebSocket error:", error);
+		};
+
+		socket.onclose = function() {
+			status.textContent = "Connection closed.";
+		};
+	}
+
+	function sendToServer(command, params)
+	{
+		// Create a JSON object to send
+		var payload = {command: command, params: params};
+		socket.send(JSON.stringify(payload));
+	}
+
+	function nextStep(current, value) 
+	{
+		switch(current)
+		{
+			case 1:
+				client.gender = value;
+				break;
+			case 2:
+				client.looking_for = value;
+
+				setTimeout(function(){
+					connectToServer();
+				}, 1000);
+
+				break;
+		}
+
+		document.getElementById('step' + current).style.display = 'none';
+		const next = document.getElementById('step' + (current + 1));
+		console.log('step' + (current + 1));
+		next.style.display = 'flex';
+	}
+
+	const chatInput = document.getElementById('chatInput');
+	const chatBox = document.getElementById('chatBox');
+
+	chatInput.addEventListener('keypress', (e) => {
+		if (e.key === 'Enter') 
+		{
+			e.preventDefault();
+			const msg = chatInput.value.trim();
+			if (msg.length > 0) 
+			{
+				appendMessage(msg, 'self');
+				chatInput.value = '';
+			}
+		}
+	});
+
+	function appendMessage(text, sender) 
+	{
+		const div = document.createElement('div');
+		div.classList.add('message', sender);
+		div.textContent = (sender === 'self' ? 'Te: ' : 'Partner: ') + text;
+		chatBox.appendChild(div);
+		chatBox.scrollTop = chatBox.scrollHeight;
+	}
 </script>
 </body>
 </html>
