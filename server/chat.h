@@ -15,18 +15,25 @@ struct chat_client {
 	ws_client_t *client;
 	struct chat_context *chat_context;
 
-	int connected :1;
-	int accepted :1;
+	int registered :1;
+	
 	int gender;
 	int looking_for;
-	int min_age;
-	int max_age;
 };
 
 struct chat_context {
 	ws_server_t *server;
 
 	struct list_node *clients_head;
+	struct waiting_room **waiting_rooms;
+	int waiting_rooms_len;
+};
+
+struct waiting_room {
+	int gender;
+	int looking_for;
+
+	struct list_node *queue;
 };
 
 struct chat_context *chat_create();
