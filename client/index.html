@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Anonim Chat</title>
   <style>
-    /* Reset és alap */
     * {
       box-sizing: border-box;
     }
@@ -20,7 +19,6 @@
       min-height: 100vh;
     }
 
-    /* Általános container az első 3 lépéshez */
     .container {
       background: #fff;
       border-radius: 12px;
@@ -33,7 +31,6 @@
       overflow: hidden;
     }
 
-    /* Step 4 container teljes képernyőre */
     #step4.container-fullscreen {
       background: #ffffff;
       width: 100vw !important;
@@ -46,7 +43,6 @@
       box-shadow: none;
     }
 
-    /* Lépések elrejtése/alap */
     .step {
       display: none;
       flex-direction: column;
@@ -88,7 +84,6 @@
       box-shadow: 0 6px 14px rgba(37,99,235,0.6);
     }
 
-    /* Chat rész stílus - teljes képernyő */
     #step4 {
       flex: 1;
       height: 100vh;
@@ -101,9 +96,10 @@
       font-weight: 600;
       padding: 15px 20px;
       border-bottom: 1px solid #ddd;
-      color: #1e293b;
+      /*color: #1e293b;*/
+	  color:#fff;
       user-select: none;
-      background: #e0e7ff;
+      background: #3b82f6;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     #chatBox {
@@ -120,7 +116,6 @@
       box-shadow: inset 0 0 8px rgba(0,0,0,0.03);
     }
 
-    /* Üzenetek stílusa */
     .message {
       max-width: 70%;
       padding: 12px 20px;
@@ -144,7 +139,6 @@
       border-bottom-left-radius: 5px;
     }
 
-    /* Input konténer fix alul */
     #inputContainer {
       display: flex;
       padding: 15px 20px;
@@ -170,7 +164,31 @@
       border-color: #3b82f6;
       box-shadow: 0 0 8px rgba(59,130,246,0.5);
     }
-  </style>
+  
+    .loading-box {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      justify-content: center;
+    }
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #3b82f6;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+    .loading-text {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #1e293b;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    </style>
 </head>
 <body>
   <div class="container" id="step1">
@@ -190,11 +208,9 @@
   </div>
 
   <div class="container" id="step3" style="display:none;">
-    <h3>Válaszd ki a korosztályod:</h3>
-    <div class="buttons">
-      <button onclick="nextStep(3, '17')">17 év alatt</button>
-      <button onclick="nextStep(3, '18-25')">18-25 év</button>
-      <button onclick="nextStep(3, '25+')">25 év felett</button>
+    <div class="loading-box">
+      <div class="loader"></div>
+      <span class="loading-text">Keresünk neked egy partnert...</span>
     </div>
   </div>
 
@@ -209,22 +225,23 @@
 <script>
   const user = {
     gender: null,
-    targetGender: null,
-    ageGroup: null
+    targetGender: null
   };
 
   function nextStep(current, value) {
     if (current === 1) user.gender = value;
     else if (current === 2) user.targetGender = value;
-    else if (current === 3) user.ageGroup = value;
 
     document.getElementById('step' + current).style.display = 'none';
     const next = document.getElementById('step' + (current + 1));
     next.style.display = 'flex';
 
-    if (current === 3) {
+    if (current === 2) {
       console.log('Felhasználó beállításai:', user);
-      // Itt indulhat a chat kapcsolat backenddel
+      setTimeout(() => {
+        next.style.display = 'none';
+        document.getElementById('step4').style.display = 'flex';
+      }, 2000);
     }
   }
 
@@ -238,7 +255,6 @@
       if (msg.length > 0) {
         appendMessage(msg, 'self');
         chatInput.value = '';
-        // Itt küldhetnéd a backendnek az üzenetet
       }
     }
   });
@@ -250,9 +266,6 @@
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
   }
-
-  // Tesztüzenet a partner oldaláról (törölhető)
-  // setTimeout(() => appendMessage('Helló, hogy vagy?', 'partner'), 2000);
 </script>
 </body>
 </html>
