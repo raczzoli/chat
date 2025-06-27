@@ -2,11 +2,15 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <pthread.h>
 
 #include "r89.h"
 #include "chat.h"
 #include "list.h"
 #include "jansson.h"
+
+static void start_client_thread(struct chat_context *ctx, struct chat_client *client);
+static void *chat_client_thread(void *arg);
 
 static int init_waiting_rooms(struct chat_context *ctx);
 static int register_client(struct chat_context *ctx, struct chat_client *client);
@@ -107,6 +111,38 @@ end:
 	return ret;
 }
 
+static void start_client_thread(struct chat_context *ctx, struct chat_client *client)
+{
+	pthread_t *thread = (pthread_t *) malloc(sizeof(pthread_t));
+
+	if (!thread) {
+		// TODO: free client, close connection etc
+		return;
+	}
+
+	struct chat_thread_arg *arg = malloc(sizeof(struct chat_thread_arg));
+	if (!arg) {
+		// TODO: free client, close connection etc
+		return;
+	}
+
+	arg->client = client;
+	arg->chat_context = ctx;
+
+    pthread_create(thread, NULL, chat_client_thread, arg);
+}
+
+static void *chat_client_thread(void *arg)
+{
+	struct chat_thread_arg *t_arg = arg;
+
+	ws_client_handle(t_arg->client->client);
+
+	free(t_arg);
+
+	return NULL;
+}
+
 void chat_init(struct chat_context *ctx)
 {
 	int ret = 0;
@@ -141,7 +177,7 @@ void chat_init(struct chat_context *ctx)
 				return;
 			}
 
-			ws_client_handle(client);
+			start_client_thread(ctx, chat_cli);
 		}
 	}
 }

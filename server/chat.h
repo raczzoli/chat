@@ -38,6 +38,11 @@ struct waiting_room {
 	struct list_node *queue;
 };
 
+struct chat_thread_arg {
+	struct chat_client *client;
+	struct chat_context *chat_context;
+};
+
 struct chat_context *chat_create();
 void chat_init(struct chat_context *ctx);
 
