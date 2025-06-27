@@ -7,7 +7,7 @@ LDFLAGS = -lpthread -lcrypto -ljansson
 PROG = chat
 
 # Source files
-SRCS = main.c chat.c ws-server.c ws-client.c base64.c
+SRCS = main.c chat.c ws-server.c ws-client.c list.c base64.c 
 OBJS = $(SRCS:.c=.o)
 
 # Default target
