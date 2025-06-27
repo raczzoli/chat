@@ -126,6 +126,7 @@ void chat_init(struct chat_context *ctx)
 
 			printf("Client registered - IP: %s, port: %d...\n", client->ip, client->port);
 
+			chat_cli->registered = 0;
 			chat_cli->client = client;
 			chat_cli->chat_context = ctx;
 
@@ -187,6 +188,7 @@ static void client_read(ws_client_t *client, struct ws_data *data)
 
 		command_str = json_string_value(command);
 		if (strcmp(command_str, "register") == 0) {
+			
 			if (chat_client->registered)
 				goto end;
 		
@@ -204,7 +206,7 @@ static void client_read(ws_client_t *client, struct ws_data *data)
 
 			chat_client->gender = gender_string_to_int( json_string_value(gender) );
 			chat_client->looking_for = gender_string_to_int( json_string_value(looking_for) );
-
+			
 			if (chat_client->gender < 1 || chat_client->looking_for < 1) {
 				fprintf(stderr, "Invalid gender and/or looking_for values in client data!\n");
 				goto end;
@@ -261,9 +263,13 @@ static int find_match_or_add_to_waiting_queue(struct chat_client *client)
 		return -1;
 	}
 
-	if (!room->queue) 
+	if (!room->queue) {
 		return add_client_to_waiting_room(client, room);
-
+	}
+	else {
+		struct chat_client *first_cli = room->queue->data;
+		list_remove(&room->queue, room->queue);
+	}
 	// search in queue
 
 	return 0;
