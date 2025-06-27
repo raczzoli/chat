@@ -277,6 +277,32 @@ static void client_read(ws_client_t *client, struct ws_data *data)
 				 */
 				goto end;
 			}
+
+			/*
+			 * message from client
+			 */
+			if (strcmp(command_str, "message") == 0) {
+				json_t *text = json_object_get(params, "text");
+				if ( (!text || !json_is_string(text))) {
+
+					fprintf(stderr, "Invalid message!\n");
+					goto end;
+				}
+
+				if (chat_client->pair) {
+					const char *text_str = json_string_value(text);
+					int resp_len = strlen(text_str) + 100;
+					char *resp_str = malloc(resp_len);
+
+					if (!resp_str)
+						goto end;
+
+					snprintf(resp_str, resp_len, "{\"command\":\"message\", \"params\":{\"text\":\"%s\"}}", text_str);
+
+					ws_client_write_text(chat_client->pair->client, resp_str, strlen(resp_str));
+					free(resp_str);
+				}
+			}
 		}
 	}
 

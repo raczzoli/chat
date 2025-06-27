@@ -257,22 +257,31 @@
 			}
 
 			var data = JSON.parse(event.data);
-			switch(data.command)
+			if (data)
 			{
-				case "register-ok":
-					nextStep(3, null);
-					break;
-				case "register-err":
-					alert("Sikertelen csatlakozás!");
-					document.location = document.location;
-					break;
-				case "match-found":
-					setTimeout(function(){
-						nextStep(4, null);
-					}, 1000);
-					break;
+				switch(data.command)
+				{
+					case "register-ok":
+						nextStep(3, null);
+						break;
+					case "register-err":
+						alert("Sikertelen csatlakozás!");
+						document.location = document.location;
+						break;
+					case "match-found":
+						setTimeout(function(){
+							nextStep(4, null);
+						}, 1000);
+						break;
+					case "message":
+						if (data.params && data.params.text)
+						{
+							appendMessage(data.params.text, 'partner');
+						}
+						break;
+				}
 			}
-			console.log("Message from server:", event.data);
+			//console.log("Message from server:", event.data);
 		};
 
 		socket.onerror = function(error) {
@@ -326,12 +335,20 @@
 			{
 				appendMessage(msg, 'self');
 				chatInput.value = '';
+				
+				// send to client
+				sendToServer("message", {text:msg});
 			}
 		}
 	});
 
 	function appendMessage(text, sender) 
 	{
+		if (!text || text.length < 1)
+		{
+			return;
+		}
+
 		const div = document.createElement('div');
 		div.classList.add('message', sender);
 		div.textContent = (sender === 'self' ? 'Te: ' : 'Partner: ') + text;
