@@ -1,10 +1,32 @@
-var socket 	= null;
+	var socket 	= null;
 	const URL 	= "ws://chateljunk.hu:8080";
 
 	var client = {
 		gender: "",
 		looking_for: ""
 	};
+
+	function init()
+	{
+		const chatInput = document.getElementById('chatInput');
+		const chatBox = document.getElementById('chatBox');
+
+		chatInput.addEventListener('keypress', (e) => {
+			if (e.key === 'Enter') 
+			{
+				e.preventDefault();
+				const msg = chatInput.value.trim();
+				if (msg.length > 0) 
+				{
+					appendMessage(msg, 'self');
+					chatInput.value = '';
+					
+					// send to client
+					sendToServer("message", {text:msg});
+				}
+			}
+		});
+	}
 
 	function connectToServer()
 	{
@@ -88,25 +110,6 @@ var socket 	= null;
 		next.style.display = 'flex';
 	}
 
-	const chatInput = document.getElementById('chatInput');
-	const chatBox = document.getElementById('chatBox');
-
-	chatInput.addEventListener('keypress', (e) => {
-		if (e.key === 'Enter') 
-		{
-			e.preventDefault();
-			const msg = chatInput.value.trim();
-			if (msg.length > 0) 
-			{
-				appendMessage(msg, 'self');
-				chatInput.value = '';
-				
-				// send to client
-				sendToServer("message", {text:msg});
-			}
-		}
-	});
-
 	function appendMessage(text, sender) 
 	{
 		if (!text || text.length < 1)
@@ -120,3 +123,4 @@ var socket 	= null;
 		chatBox.appendChild(div);
 		chatBox.scrollTop = chatBox.scrollHeight;
 	}
+
