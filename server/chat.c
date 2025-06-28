@@ -308,9 +308,10 @@ static void client_read(ws_client_t *client, struct ws_data *data)
 
 	goto end;
 
-register_err:
+register_err: {
 	char *resp_str = "{\"command\":\"register-err\"}";
 	ws_client_write_text(client, resp_str, strlen(resp_str));
+}
 
 end:
 	if (root)
