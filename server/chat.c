@@ -293,7 +293,7 @@ static void client_read(ws_client_t *client, struct ws_data *data)
 					if (!resp_str)
 						goto end;
 
-					snprintf(resp_str, resp_len, "{\"command\":\"message\", \"params\":{\"text\":\"%s\"}}", text_str);
+					snprintf(resp_str, resp_len, "{\"command\":\"message\", \"params\":{\"source\":\"partner\", \"text\":\"%s\"}}", text_str);
 
 					ws_client_write_text(chat_client->pair->client, resp_str, strlen(resp_str));
 					free(resp_str);
@@ -399,6 +399,15 @@ static int register_client(struct chat_context *ctx, struct chat_client *client)
 
 static void client_close(ws_client_t *client)
 {
+	struct chat_client *chat_client = client->owner;
+	if (chat_client->pair) {
+		char *resp_str = "{\"command\":\"match-left-chat\"}";
+		int resp_str_len = strlen(resp_str);
+
+		ws_client_write_text(chat_client->pair->client, resp_str, resp_str_len);
+	}
+
+
 	printf("Client with IP: %s closed the connection...\n", client->ip);
 }
 

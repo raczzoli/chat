@@ -119,7 +119,7 @@
 
 		const div = document.createElement('div');
 		div.classList.add('message', sender);
-		div.textContent = (sender === 'self' ? 'Te: ' : 'Partner: ') + text;
+		div.textContent = text;
 		chatBox.appendChild(div);
 		chatBox.scrollTop = chatBox.scrollHeight;
 	}
