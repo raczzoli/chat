@@ -49,6 +49,8 @@ struct ws_client {
 	int headers_len;
 	struct ws_client_ops ops;
 	void *owner;
+
+	pthread_mutex_t lock;
 };
 
 struct ws_frame {

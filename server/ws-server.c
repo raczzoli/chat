@@ -108,6 +108,8 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 		goto err;
 	}
 
+	pthread_mutex_init(&client->lock, NULL);
+
 	client->ssl = SSL_new(server->ssl_ctx);
 	SSL_set_fd(client->ssl, client->fd);
 
