@@ -97,7 +97,6 @@ static int ws_client_read(ws_client_t *client)
 	struct ws_frame frame;
 	struct ws_data data;
 	int ret = 0;
-	SSL *ssl = NULL;
 
 	buffer = malloc(MAX_WS_BUFFER_LEN);
 
@@ -109,19 +108,14 @@ static int ws_client_read(ws_client_t *client)
 	orig_buffer = buffer;
 
 	while (1) {
-		pthread_mutex_lock(&client->lock);
-
 		if (client->status == CLIENT_DISCONNECTED || !client->ssl) {
 			ret = 0;
 			goto end;
 		}
-		ssl = client->ssl;
-		
-		pthread_mutex_unlock(&client->lock);
 
-		bytes_read = SSL_read(ssl, buffer, MAX_WS_BUFFER_LEN);//recv(client->fd, buffer, MAX_WS_BUFFER_LEN, 0);
+		bytes_read = SSL_read(client->ssl, buffer, MAX_WS_BUFFER_LEN);//recv(client->fd, buffer, MAX_WS_BUFFER_LEN, 0);
 		if (bytes_read < 0) {
-			ret = SSL_get_error(ssl, ret);
+			ret = SSL_get_error(client->ssl, ret);
 			fprintf(stderr, "Error reading from client (code: %d)!\n", ret);
 			ERR_print_errors_fp(stderr);
 			
@@ -236,8 +230,6 @@ int ws_client_close(ws_client_t *client)
 	if (client->status == CLIENT_DISCONNECTED)
 		return 0;
 
-	pthread_mutex_lock(&client->lock);
-
 	client->status = CLIENT_DISCONNECTED;
 
 	if (client->ssl) {
@@ -248,8 +240,6 @@ int ws_client_close(ws_client_t *client)
 
 	close(client->fd);
 	client->fd = -1;
-	
-	pthread_mutex_unlock(&client->lock);
 
 	if (client->ops.close)
 		client->ops.close(client);
@@ -341,5 +331,4 @@ void ws_client_free(ws_client_t *client)
 {
 	free(client);
 	// TODO: free headers;
-	// TODO: pthread_mutex_destroy(&client->lock);
 }

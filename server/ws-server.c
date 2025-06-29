@@ -96,7 +96,6 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 		return NULL;
 	}
 
-	client->ssl = NULL;
 	client->headers = NULL;
 	client->headers_len = 0;
 	client->addr_len = sizeof(struct sockaddr_in);
@@ -107,8 +106,6 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 		fprintf(stderr, "Error accepting websocket client!\n");
 		goto err;
 	}
-
-	pthread_mutex_init(&client->lock, NULL);
 
 	client->ssl = SSL_new(server->ssl_ctx);
 	SSL_set_fd(client->ssl, client->fd);
