@@ -100,6 +100,7 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 	client->headers = NULL;
 	client->headers_len = 0;
 	client->addr_len = sizeof(struct sockaddr_in);
+	client->status = CLIENT_CONNECTED;
 
 	client->fd = accept(server->fd, (struct sockaddr*)&client->addr, &client->addr_len);
 
