@@ -400,11 +400,19 @@ static int register_client(struct chat_context *ctx, struct chat_client *client)
 static void client_close(ws_client_t *client)
 {
 	struct chat_client *chat_client = client->owner;
+	
 	if (chat_client->pair) {
+		struct chat_client *pair = chat_client->pair;
+
 		char *resp_str = "{\"command\":\"match-left-chat\"}";
 		int resp_str_len = strlen(resp_str);
 
-		ws_client_write_text(chat_client->pair->client, resp_str, resp_str_len);
+		// here we delete the pairing between the two clients
+		chat_client->pair = NULL;
+		pair->pair = NULL;
+
+		ws_client_write_text(pair->client, resp_str, resp_str_len);
+		ws_client_close(pair->client);
 		// TODO: close pair connection too
 	}
 
