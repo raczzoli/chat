@@ -182,6 +182,7 @@ static int handle_client_handshake(ws_client_t *client)
 		return ret;
 	}
 
+	memset(buffer, 0, MAX_BUFFER_LEN);
 	ret = parse_http_headers(client, buffer);
 
 	if (ret) {
