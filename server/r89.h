@@ -8,8 +8,8 @@
 #define MAX_BUFFER_LEN 1024
 
 #define WSS_PORT 8080
-#define WSS_CERT_PATH "etc/letsencrypt/live/chateljunk.hu/cert.pem"
-#define WSS_KEY_PATH "etc/letsencrypt/live/chateljunk.hu/privkey.pem"
+#define WSS_CERT_PATH "/etc/letsencrypt/live/chateljunk.hu/cert.pem"
+#define WSS_KEY_PATH "/etc/letsencrypt/live/chateljunk.hu/privkey.pem"
 
 
 #define container_of(ptr, type, member) \
