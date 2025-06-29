@@ -2,13 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "r89.h"
 #include "ws-client.h"
 
 static int parse_frame(struct ws_frame *frame, char **buffer);
 static int ws_client_read(ws_client_t *client);
-static void ws_client_closed(ws_client_t *client);
+int ws_client_close(ws_client_t *client);
 
 int ws_client_handle(ws_client_t *client)
 {
@@ -22,6 +23,9 @@ int ws_client_handle(ws_client_t *client)
 
 int ws_client_write_text(ws_client_t *client, char *text, uint64_t len)
 {
+	if (client->status == CLIENT_DISCONNECTED)
+		return -1;
+
 	int ret = 0;
 	char *buffer = NULL;
 	uint64_t buffer_len = 0;
@@ -113,8 +117,7 @@ static int ws_client_read(ws_client_t *client)
 			return ret;
 		}
 		else if (bytes_read == 0) {
-			ws_client_closed(client);
-
+			ws_client_close(client);
 			break;
 		}
 		else if (bytes_read > 0) {
@@ -190,7 +193,7 @@ static int ws_client_read(ws_client_t *client)
 				break;
 
 				case 0x8:
-					ws_client_closed(client);
+					ws_client_close(client);
 				break;
 
 				case 0x9: // PING
@@ -213,14 +216,23 @@ static int ws_client_read(ws_client_t *client)
 	return ret;
 }
 
-static void ws_client_closed(ws_client_t *client)
+int ws_client_close(ws_client_t *client)
 {
 	/*
 	 * if client already is disconnected we ignore 
 	 * the call
 	 */
 	if (client->status == CLIENT_DISCONNECTED)
-		return;
+		return 0;
+
+	if (client->ssl) {
+		SSL_shutdown(client->ssl);
+		SSL_free(client->ssl);
+		client->ssl = NULL;
+	}
+
+	close(client->fd);
+	client->fd = 0;
 
 	client->status = CLIENT_DISCONNECTED;
 
@@ -228,6 +240,8 @@ static void ws_client_closed(ws_client_t *client)
 		client->ops.close(client);
 
 	// TODO: handle cleaning up stuff
+
+	return 0;
 }
 
 static int parse_frame(struct ws_frame *frame, char **buffer)
