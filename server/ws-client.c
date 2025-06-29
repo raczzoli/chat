@@ -8,7 +8,7 @@
 
 static int parse_frame(struct ws_frame *frame, char **buffer);
 static int ws_client_read(ws_client_t *client);
-
+static void ws_client_closed(ws_client_t *client);
 
 int ws_client_handle(ws_client_t *client)
 {
@@ -113,8 +113,7 @@ static int ws_client_read(ws_client_t *client)
 			return ret;
 		}
 		else if (bytes_read == 0) {
-			if (client->ops.close)
-				client->ops.close(client);
+			ws_client_closed(client);
 
 			break;
 		}
@@ -191,8 +190,7 @@ static int ws_client_read(ws_client_t *client)
 				break;
 
 				case 0x8:
-					if (client->ops.close)
-						client->ops.close(client);
+					ws_client_closed(client);
 				break;
 
 				case 0x9: // PING
@@ -213,6 +211,23 @@ static int ws_client_read(ws_client_t *client)
 		free(orig_buffer);
 
 	return ret;
+}
+
+static void ws_client_closed(ws_client_t *client)
+{
+	/*
+	 * if client already is disconnected we ignore 
+	 * the call
+	 */
+	if (client->status == CLIENT_DISCONNECTED)
+		return;
+
+	client->status = CLIENT_DISCONNECTED;
+
+	if (client->ops.close)
+		client->ops.close(client);
+
+	// TODO: handle cleaning up stuff
 }
 
 static int parse_frame(struct ws_frame *frame, char **buffer)

@@ -15,6 +15,11 @@
 
 typedef struct ws_client ws_client_t;
 
+enum ws_client_statuses {
+	CLIENT_CONNECTED=1,
+	CLIENT_DISCONNECTED
+};
+
 struct http_header {
 	char *key;
 	char *value;
@@ -39,6 +44,7 @@ struct ws_client {
 	socklen_t addr_len;
 	char ip[INET_ADDRSTRLEN];
 	int port;
+	enum ws_client_statuses status;
 	struct http_header **headers;
 	int headers_len;
 	struct ws_client_ops ops;

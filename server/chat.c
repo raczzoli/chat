@@ -405,6 +405,7 @@ static void client_close(ws_client_t *client)
 		int resp_str_len = strlen(resp_str);
 
 		ws_client_write_text(chat_client->pair->client, resp_str, resp_str_len);
+		// TODO: close pair connection too
 	}
 
 
