@@ -1,5 +1,5 @@
 	var socket 	= null;
-	const URL 	= "ws://chateljunk.hu:8080";
+	const URL 	= "wss://chateljunk.hu:8443";
 
 	var client = {
 		gender: "",
