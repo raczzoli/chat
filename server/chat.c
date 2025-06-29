@@ -35,6 +35,7 @@ struct chat_context *chat_create(struct ws_server_config config)
 	}
 
 	ctx->clients_head = NULL;
+	ctx->waiting_rooms = NULL;
 	ctx->server = ws_server_create(config);
 
 	if (!ctx->server) {
