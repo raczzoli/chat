@@ -224,7 +224,7 @@ static int handle_client_handshake(ws_client_t *client)
 
 	free(resp_key_base64);
 
-	bytes_sent = send(client->fd, buffer, strlen(buffer), 0);
+	bytes_sent = SSL_write(client->ssl, buffer, strlen(buffer));//send(client->fd, buffer, buffer_len, 0);
 
 	if (bytes_sent <= 0) {
 		fprintf(stderr, "Error sending handshake response to client (send() return code: %d)!\n", bytes_sent);
