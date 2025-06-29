@@ -105,8 +105,17 @@ static int ws_client_read(ws_client_t *client)
 
 	while (1) {
 		bytes_read = SSL_read(client->ssl, buffer, MAX_WS_BUFFER_LEN);//recv(client->fd, buffer, MAX_WS_BUFFER_LEN, 0);
+		if (bytes_read < 0) {
+			int err = SSL_get_error(client->ssl, ret);
+			fprintf(stderr, "Error reading from client (code: %d)!\n", err);
+		}
+		else if (bytes_read == 0) {
+			if (client->ops.close)
+				client->ops.close(client);
 
-		if (bytes_read > 0) {
+			break;
+		}
+		else if (bytes_read > 0) {
 			ret = parse_frame(&frame, &buffer);
 
 			if (ret) {
@@ -194,16 +203,6 @@ static int ws_client_read(ws_client_t *client)
 				default:
 					fprintf(stderr, "Invalid opcode 0x%02X from client!\n", frame.opcode);
 			}
-		}
-		else if (bytes_read == 0) {
-			if (client->ops.close)
-				client->ops.close(client);
-
-			break;
-		}
-		else {
-			// TODO: add some read error callback
-			return bytes_read;
 		}
 	}
 
