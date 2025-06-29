@@ -69,7 +69,7 @@
 						var msg = "A chatpartnered kilépett a beszélgetésből. <br />"+
 									"Kattints az alábbi linkre, ha új partnert szeretnél keresni.<br /><br />"+
 									"<a href=\"javascript:refresh();\">Új partner keresése</a>";
-						ppendMessage(msg, 'system');
+						appendMessage(msg, 'system');
 						break;
 					case "message":
 						if (data.params && data.params.text)
@@ -130,7 +130,7 @@
 
 		const div = document.createElement('div');
 		div.classList.add('message', sender);
-		div.textContent = text;
+		div.innerHTML = text;
 		chatBox.appendChild(div);
 		chatBox.scrollTop = chatBox.scrollHeight;
 	}
