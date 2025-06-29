@@ -173,11 +173,13 @@ static int handle_client_handshake(ws_client_t *client)
 	unsigned char resp_key_hash[SHA_DIGEST_LENGTH];
 	char *resp_key_base64;
 	
-	bytes_read = recv(client->fd, buffer, MAX_BUFFER_LEN - 1, 0);
-
+	bytes_read = SSL_read(client->ssl, buffer, MAX_BUFFER_LEN-1);
 	if (bytes_read <= 0) {
-		fprintf(stderr, "Error reading handshake request from client or the client unexpectedly closed the connection (recv return value: %d)!\n", bytes_read);
-		return -1;
+		ret = SSL_get_error(client->ssl, ret);
+		fprintf(stderr, "Error reading handshake request from client or the client unexpectedly closed the connection (code: %d)!\n", ret);
+		ERR_print_errors_fp(stderr);
+		
+		return ret;
 	}
 
 	ret = parse_http_headers(client, buffer);
