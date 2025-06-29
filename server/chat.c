@@ -413,7 +413,6 @@ static void client_close(ws_client_t *client)
 
 		ws_client_write_text(pair->client, resp_str, resp_str_len);
 		ws_client_close(pair->client);
-		// TODO: close pair connection too
 	}
 
 

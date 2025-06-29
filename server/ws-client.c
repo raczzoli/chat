@@ -230,16 +230,16 @@ int ws_client_close(ws_client_t *client)
 	if (client->status == CLIENT_DISCONNECTED)
 		return 0;
 
+	client->status = CLIENT_DISCONNECTED;
+
+	close(client->fd);
+	client->fd = 0;
+
 	if (client->ssl) {
 		SSL_shutdown(client->ssl);
 		SSL_free(client->ssl);
 		client->ssl = NULL;
 	}
-
-	close(client->fd);
-	client->fd = 0;
-
-	client->status = CLIENT_DISCONNECTED;
 
 	if (client->ops.close)
 		client->ops.close(client);
