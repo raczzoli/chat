@@ -57,7 +57,7 @@ ws_server_t *ws_server_create(struct ws_server_config config)
 
 	// Bind to socket
 	if (bind(server->fd, (struct sockaddr*)&server->addr, sizeof(server->addr)) < 0) {
-		fprintf(stderr, "Error binding to socket (code: %d)!\n", errno);
+		fprintf(stderr, "Error binding to socket (%s)!\n", strerror(errno));
 		goto err2;
 	}
 
