@@ -28,6 +28,11 @@
 		});
 	}
 
+	function refresh()
+	{
+		document.location = document.location;
+	}
+
 	function connectToServer()
 	{
 		socket = new WebSocket(URL);
@@ -59,6 +64,12 @@
 						setTimeout(function(){
 							nextStep(4, null);
 						}, 1000);
+						break;
+					case "match-left-chat":
+						var msg = "A chatpartnered kilépett a beszélgetésből. <br />"+
+									"Kattints az alábbi linkre, ha új partnert szeretnél keresni.<br /><br />"+
+									"<a href=\"javascript:refresh();\">Új partner keresése</a>";
+						ppendMessage(msg, 'system');
 						break;
 					case "message":
 						if (data.params && data.params.text)
