@@ -87,7 +87,7 @@
 		};
 
 		socket.onclose = function() {
-			
+			console.log("WebSocker connection closed...");
 		};
 	}
 
