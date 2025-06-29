@@ -63,6 +63,7 @@ int ws_client_handle(ws_client_t *client);
 
 int ws_client_write_text(ws_client_t *client, char *text, uint64_t len);
 
+int ws_client_close(ws_client_t *client);
 void ws_client_free(ws_client_t *client);
 
 

@@ -9,7 +9,7 @@
 
 static int parse_frame(struct ws_frame *frame, char **buffer);
 static int ws_client_read(ws_client_t *client);
-int ws_client_close(ws_client_t *client);
+
 
 int ws_client_handle(ws_client_t *client)
 {
