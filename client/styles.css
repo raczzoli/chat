@@ -140,7 +140,13 @@
 		background: #cc0000;
 		color: white;
 		align-self: center;
+		text-align:center;
     }
+	.message.system a {
+		color:#fff;
+		font-weight:bold;
+		text-decoration:none;
+	}
 
 
     #inputContainer {
