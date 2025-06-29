@@ -87,7 +87,7 @@
 		};
 
 		socket.onclose = function() {
-			status.textContent = "Connection closed.";
+			
 		};
 	}
 
