@@ -117,7 +117,7 @@ static int ws_client_read(ws_client_t *client)
 		}
 		ssl = client->ssl;
 		
-		pthread_mutex_lock(&client->lock);
+		pthread_mutex_unlock(&client->lock);
 
 		bytes_read = SSL_read(ssl, buffer, MAX_WS_BUFFER_LEN);//recv(client->fd, buffer, MAX_WS_BUFFER_LEN, 0);
 		if (bytes_read < 0) {
