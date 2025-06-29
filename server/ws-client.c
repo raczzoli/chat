@@ -108,6 +108,11 @@ static int ws_client_read(ws_client_t *client)
 	orig_buffer = buffer;
 
 	while (1) {
+		if (client->status == CLIENT_DISCONNECTED || !client->ssl) {
+			ret = 0;
+			goto end;
+		}
+
 		bytes_read = SSL_read(client->ssl, buffer, MAX_WS_BUFFER_LEN);//recv(client->fd, buffer, MAX_WS_BUFFER_LEN, 0);
 		if (bytes_read < 0) {
 			ret = SSL_get_error(client->ssl, ret);
@@ -210,8 +215,8 @@ static int ws_client_read(ws_client_t *client)
 		}
 	}
 
-	end:
-		free(orig_buffer);
+end:
+	free(orig_buffer);
 
 	return ret;
 }
