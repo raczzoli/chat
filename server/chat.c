@@ -65,6 +65,7 @@ static int init_waiting_rooms(struct chat_context *ctx)
 	}
 	room->gender = GENDER_MALE;
 	room->looking_for = GENDER_MALE;
+	room->queue = NULL;
 	ctx->waiting_rooms[ctx->waiting_rooms_len++] = room;
 
 	// MALE : FEMALE
@@ -75,6 +76,7 @@ static int init_waiting_rooms(struct chat_context *ctx)
 	}
 	room->gender = GENDER_MALE;
 	room->looking_for = GENDER_FEMALE;
+	room->queue = NULL;
 	ctx->waiting_rooms[ctx->waiting_rooms_len++] = room;
 
 	// FEMALE : FEMALE
@@ -85,6 +87,7 @@ static int init_waiting_rooms(struct chat_context *ctx)
 	}
 	room->gender = GENDER_FEMALE;
 	room->looking_for = GENDER_FEMALE;
+	room->queue = NULL;
 	ctx->waiting_rooms[ctx->waiting_rooms_len++] = room;
 
 	// FEMALE : MALE
@@ -95,6 +98,7 @@ static int init_waiting_rooms(struct chat_context *ctx)
 	}
 	room->gender = GENDER_FEMALE;
 	room->looking_for = GENDER_MALE;
+	room->queue = NULL;
 	ctx->waiting_rooms[ctx->waiting_rooms_len++] = room;
 
 	goto end;

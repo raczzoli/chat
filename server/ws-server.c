@@ -96,6 +96,7 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 		return NULL;
 	}
 
+	client->ssl = NULL;
 	client->headers = NULL;
 	client->headers_len = 0;
 	client->addr_len = sizeof(struct sockaddr_in);
@@ -175,7 +176,7 @@ static int handle_client_handshake(ws_client_t *client)
 
 	memset(buffer, 0, MAX_BUFFER_LEN);
 	bytes_read = SSL_read(client->ssl, buffer, MAX_BUFFER_LEN-1);
-	
+
 	if (bytes_read <= 0) {
 		ret = SSL_get_error(client->ssl, ret);
 		fprintf(stderr, "Error reading handshake request from client or the client unexpectedly closed the connection (code: %d)!\n", ret);
