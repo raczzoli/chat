@@ -121,18 +121,27 @@
       user-select: text;
       box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     }
-    .message.self {
+    
+	.message.self {
       background: #3b82f6;
       color: white;
       align-self: flex-end;
       border-bottom-right-radius: 5px;
     }
+
     .message.partner {
       background: #e0e7ff;
       color: #1e293b;
       align-self: flex-start;
       border-bottom-left-radius: 5px;
     }
+
+	.message.system {
+		background: #cc0000;
+		color: white;
+		align-self: center;
+    }
+
 
     #inputContainer {
       display: flex;
