@@ -168,7 +168,7 @@ static int handle_client_handshake(ws_client_t *client)
 	int bytes_read = 0;
 	int bytes_sent = 0;
 	char buffer[MAX_BUFFER_LEN];
-	char *wss_req_key;
+	char *wss_req_key = NULL;
 	char wss_resp_key[MAX_BUFFER_LEN];
 	unsigned char resp_key_hash[SHA_DIGEST_LENGTH];
 	char *resp_key_base64;
