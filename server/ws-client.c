@@ -72,7 +72,7 @@ int ws_client_write_text(ws_client_t *client, char *text, uint64_t len)
 
 	memcpy(buffer+payload_offset, text, len);
 
-	written = send(client->fd, buffer, buffer_len, 0);
+	written = SSL_write(client->ssl, buffer, buffer_len);//send(client->fd, buffer, buffer_len, 0);
 
 	if (written < 0) {
 		fprintf(stderr, "Error writing bytes to client socket (code: %ld)!\n", written);
@@ -104,7 +104,7 @@ static int ws_client_read(ws_client_t *client)
 	orig_buffer = buffer;
 
 	while (1) {
-		bytes_read = recv(client->fd, buffer, MAX_WS_BUFFER_LEN, 0);
+		bytes_read = SSL_read(client->ssl, buffer, MAX_WS_BUFFER_LEN);//recv(client->fd, buffer, MAX_WS_BUFFER_LEN, 0);
 
 		if (bytes_read > 0) {
 			ret = parse_frame(&frame, &buffer);

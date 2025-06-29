@@ -16,7 +16,7 @@ struct ws_server_config {
 };
 
 typedef struct ws_server {
-	SSL_CTX *ctx;
+	SSL_CTX *ssl_ctx;
 	int fd;
 	struct sockaddr_in addr;
 } ws_server_t;

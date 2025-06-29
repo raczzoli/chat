@@ -2,6 +2,8 @@
 #define WS_CLIENT_H
 
 #include <arpa/inet.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 /*
  * TODO: for the moment our max read buffer
@@ -32,6 +34,7 @@ struct ws_client_ops {
 
 struct ws_client {
 	int fd;
+	SSL *ssl;
 	struct sockaddr_in addr;
 	socklen_t addr_len;
 	char ip[INET_ADDRSTRLEN];

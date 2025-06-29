@@ -99,10 +99,23 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 	client->headers = NULL;
 	client->headers_len = 0;
 	client->addr_len = sizeof(struct sockaddr_in);
+
 	client->fd = accept(server->fd, (struct sockaddr*)&client->addr, &client->addr_len);
 
 	if (client->fd < 0) {
 		fprintf(stderr, "Error accepting websocket client!\n");
+		goto err;
+	}
+
+	client->ssl = SSL_new(server->ssl_ctx);
+	SSL_set_fd(client->ssl, client->fd);
+
+	if (SSL_accept(client->ssl) <= 0) {
+		// SSL handshake failed
+		ERR_print_errors_fp(stderr);
+		SSL_free(client->ssl);
+
+		fprintf(stderr, "SSL handshake failed with client!\n");
 		goto err;
 	}
 
@@ -131,17 +144,17 @@ static int init_ssl_context(ws_server_t *server, struct ws_server_config config)
     OpenSSL_add_all_algorithms();
     SSL_load_error_strings();
 
-    server->ctx = SSL_CTX_new( TLS_server_method() );
-    if (!server->ctx) {
+    server->ssl_ctx = SSL_CTX_new( TLS_server_method() );
+    if (!server->ssl_ctx) {
 		fprintf(stderr, "Error creating SSL context!\n");
 		return -1;
     }
 
-    if (SSL_CTX_use_certificate_file(server->ctx, config.ssl_cert_path, SSL_FILETYPE_PEM) <= 0 ||
-        SSL_CTX_use_PrivateKey_file(server->ctx, config.ssl_key_path, SSL_FILETYPE_PEM) <= 0 ||
-        !SSL_CTX_check_private_key(server->ctx)) {
+    if (SSL_CTX_use_certificate_file(server->ssl_ctx, config.ssl_cert_path, SSL_FILETYPE_PEM) <= 0 ||
+        SSL_CTX_use_PrivateKey_file(server->ssl_ctx, config.ssl_key_path, SSL_FILETYPE_PEM) <= 0 ||
+        !SSL_CTX_check_private_key(server->ssl_ctx)) {
         ERR_print_errors_fp(stderr);
-        SSL_CTX_free(server->ctx);
+        SSL_CTX_free(server->ssl_ctx);
 
         return -1;
     }
