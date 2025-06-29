@@ -23,9 +23,8 @@ static void client_read(ws_client_t *client, struct ws_data *data);
 static void client_close(ws_client_t *client);
 
 
-struct chat_context *chat_create()
+struct chat_context *chat_create(struct ws_server_config config)
 {
-	struct ws_server_config config;
 	struct chat_context *ctx = NULL;
 	
 	ctx = malloc(sizeof(struct chat_context));
@@ -35,7 +34,6 @@ struct chat_context *chat_create()
 		return NULL;
 	}
 
-	config.port = WS_PORT;
 	ctx->server = ws_server_create(config);
 
 	if (!ctx->server) {
@@ -186,8 +184,6 @@ static void client_read(ws_client_t *client, struct ws_data *data)
 {
 	json_t *root;
 	json_error_t error;
-
-	//printf("Data from client IP: %s... payload len: %ld, data: %s\n", client->ip, data->payload_len, data->payload);
 
 	struct chat_client *chat_client = client->owner;
 

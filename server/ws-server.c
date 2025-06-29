@@ -11,9 +11,11 @@
 
 static int parse_http_headers(ws_client_t *client, char *buffer);
 static int handle_client_handshake(ws_client_t *client);
+static int init_ssl_context(ws_server_t *server, struct ws_server_config config);
 
 ws_server_t *ws_server_create(struct ws_server_config config)
 {
+	int ret = 0;
 	ws_server_t *server = NULL;
 
 	if (config.port <= 0) {
@@ -28,6 +30,13 @@ ws_server_t *ws_server_create(struct ws_server_config config)
 		return NULL;
 	}
 	
+	ret = init_ssl_context(server, config);
+
+	if (ret) {
+		free(server);
+		return NULL;
+	}
+
 	// Creating socket
 	server->fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server->fd < 0) {
@@ -114,6 +123,30 @@ err:
 	}
 
 	return NULL;
+}
+
+static int init_ssl_context(ws_server_t *server, struct ws_server_config config)
+{
+    SSL_library_init();
+    OpenSSL_add_all_algorithms();
+    SSL_load_error_strings();
+
+    server->ctx = SSL_CTX_new( TLS_server_method() );
+    if (!server->ctx) {
+		fprintf(stderr, "Error creating SSL context!\n");
+		return -1;
+    }
+
+    if (SSL_CTX_use_certificate_file(server->ctx, config.ssl_cert_path, SSL_FILETYPE_PEM) <= 0 ||
+        SSL_CTX_use_PrivateKey_file(server->ctx, config.ssl_key_path, SSL_FILETYPE_PEM) <= 0 ||
+        !SSL_CTX_check_private_key(server->ctx)) {
+        ERR_print_errors_fp(stderr);
+        SSL_CTX_free(server->ctx);
+
+        return -1;
+    }
+
+	return 0;
 }
 
 static int handle_client_handshake(ws_client_t *client)

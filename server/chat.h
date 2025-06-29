@@ -43,7 +43,7 @@ struct chat_thread_arg {
 	struct chat_context *chat_context;
 };
 
-struct chat_context *chat_create();
+struct chat_context *chat_create(struct ws_server_config config);
 void chat_init(struct chat_context *ctx);
 
 void chat_free(struct chat_context *ctx);

@@ -1,7 +1,7 @@
 # Compiler and flags
 CC = gcc
 CFLAGS = -std=gnu99 -Wall -Wextra -g
-LDFLAGS = -lpthread -lcrypto -ljansson
+LDFLAGS = -lpthread -lcrypto -lssl -ljansson
 
 # Target executable
 PROG = chat

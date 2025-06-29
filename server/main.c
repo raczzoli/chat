@@ -7,11 +7,15 @@
 #include "ws-client.h"
 
 struct chat_context *chat_ctx;
+struct ws_server_config ws_config;
 
 int main()
 {
+	ws_config.port = WSS_PORT;
+	ws_config.ssl_cert_path = WSS_CERT_PATH;
+	ws_config.ssl_key_path = WSS_KEY_PATH;
 
-	chat_ctx = chat_create();
+	chat_ctx = chat_create(ws_config);
 
 	if (!chat_ctx)
 		return -1;
