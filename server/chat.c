@@ -382,8 +382,8 @@ static int add_client_to_waiting_room(struct chat_context *ctx, struct chat_clie
 		return -1;
 	}
 
-	printf("Client with IP: %s added to waiting room succesfuly (Gender: %d, looking for: %d)...\n", 
-			client->client->ip, room->gender, room->looking_for);
+	//printf("Client with IP: %s added to waiting room succesfuly (Gender: %d, looking for: %d)...\n", 
+	//		client->client->ip, room->gender, room->looking_for);
 
 	return 0;
 }
@@ -398,8 +398,7 @@ static int register_client(struct chat_context *ctx, struct chat_client *client)
 		return -1;
 	}
 
-	printf("Client with IP: %s added to clients list...\n", client->client->ip);
-
+	//printf("Client with IP: %s added to clients list...\n", client->client->ip);
 	return 0;
 }
 

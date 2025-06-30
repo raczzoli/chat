@@ -239,8 +239,10 @@ end:
 int ws_client_close(ws_client_t *client)
 {
 	/*
-	 * if client already is disconnected we ignore 
-	 * the call
+	 * since we are calling this function when we want 
+	 * to close the connection but also when the client
+	 * left, we add a check here if client already has 
+	 * the status of CLIENT_DISCONNECTED
 	 */
 	if (client->status == CLIENT_DISCONNECTED)
 		return 0;
