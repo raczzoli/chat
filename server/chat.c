@@ -169,6 +169,7 @@ void chat_init(struct chat_context *ctx)
 			chat_cli->registered = 0;
 			chat_cli->client = client;
 			chat_cli->chat_context = ctx;
+			chat_cli->pair = NULL;
 
 			client->owner = (void *)chat_cli;
 			client->ops.read = client_read;
