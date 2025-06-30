@@ -21,6 +21,8 @@ static int gender_string_to_int(const char *g);
 // websocket client callbacks
 static void client_read(ws_client_t *client, struct ws_data *data);
 static void client_close(ws_client_t *client);
+static void remove_client_from_stacks(struct chat_context *ctx, struct chat_client *client);
+static void free_client(struct chat_client *client);
 
 
 struct chat_context *chat_create(struct ws_server_config config)
@@ -352,7 +354,7 @@ static struct chat_client *find_match(struct chat_context *ctx, struct chat_clie
 
 	// we have a match
 	struct chat_client *first_cli = room->queue->data;
-	list_remove(&room->queue, room->queue);
+	list_remove_node(&room->queue, room->queue);
 
 	if (first_cli)
 		return first_cli;
@@ -375,7 +377,7 @@ static int add_client_to_waiting_room(struct chat_context *ctx, struct chat_clie
 	if (!room)
 		return -1;
 
-	struct list_node *node = list_add(&room->queue, client);
+	struct list_node *node = list_add_node(&room->queue, client);
 
 	if (!node) {
 		fprintf(stderr, "Error adding client with IP: %s to room (Gender: %d, looking for: %d)!\n", 
@@ -391,7 +393,7 @@ static int add_client_to_waiting_room(struct chat_context *ctx, struct chat_clie
 
 static int register_client(struct chat_context *ctx, struct chat_client *client)
 {
-	struct list_node *ret = list_add(&ctx->clients_head, client);
+	struct list_node *ret = list_add_node(&ctx->clients_head, client);
 
 	if (!ret) {
 		// TODO - maybe close the connection
@@ -406,7 +408,8 @@ static int register_client(struct chat_context *ctx, struct chat_client *client)
 static void client_close(ws_client_t *client)
 {
 	struct chat_client *chat_client = client->owner;
-	
+	struct chat_context *ctx = chat_client->chat_context;
+
 	if (chat_client->pair) {
 		struct chat_client *pair = chat_client->pair;
 
@@ -421,8 +424,30 @@ static void client_close(ws_client_t *client)
 		ws_client_close(pair->client);
 	}
 
-
 	printf("Client with IP: %s closed the connection...\n", client->ip);
+
+	remove_client_from_stacks(ctx, chat_client);
+	free_client(chat_client);
+}
+
+static void remove_client_from_stacks(struct chat_context *ctx, struct chat_client *client)
+{
+	struct list_node *node = NULL;
+
+	node = list_get_data_node(&ctx->clients_head, client);
+
+	if (node) {
+		list_remove_node(&ctx->clients_head, node);
+		printf("Client with IP: %s removed from clients stack...\n", client->client->ip);
+	}
+
+	//ctx->waiting_rooms = NULL;
+}
+
+static void free_client(struct chat_client *client)
+{
+	if (client)
+		free(client);
 }
 
 void chat_free(struct chat_context *ctx)
