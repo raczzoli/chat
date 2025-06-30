@@ -325,6 +325,7 @@ void ws_client_free(ws_client_t *client)
 		}
 
 		free(client->headers);
+		client->headers = NULL;
 	}
 
 	pthread_mutex_destroy(&client->lock);
