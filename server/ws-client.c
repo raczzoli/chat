@@ -312,6 +312,7 @@ end:
 
 void ws_client_free(ws_client_t *client)
 {
+	printf("Freeing client with port: %d\n", client->port);
 	if (client->headers) {
 		for (int i=0;i<client->headers_len;i++) {
 			struct http_header *header = client->headers[i];
