@@ -97,6 +97,7 @@ static int ws_client_read(ws_client_t *client)
 	struct ws_frame frame;
 	struct ws_data data;
 	int ret = 0;
+	SSL *ssl = client->ssl;
 
 	buffer = malloc(MAX_WS_BUFFER_LEN);
 
@@ -109,34 +110,27 @@ static int ws_client_read(ws_client_t *client)
 
 	while (1) {
 		
-		if (client->status == CLIENT_DISCONNECTED || !client->ssl) {
+		if (client->status == CLIENT_DISCONNECTED || !ssl) {
 			ret = 0;
 			goto end;
 		}
 
-		bytes_read = SSL_read(client->ssl, buffer, MAX_WS_BUFFER_LEN);//recv(client->fd, buffer, MAX_WS_BUFFER_LEN, 0);
+		bytes_read = SSL_read(ssl, buffer, MAX_WS_BUFFER_LEN);//recv(client->fd, buffer, MAX_WS_BUFFER_LEN, 0);
 
-		printf("BYTES READ: %d\n", bytes_read);
-
-		if (bytes_read < 0) { // err
-			ret = SSL_get_error(client->ssl, ret);
-			fprintf(stderr, "Error reading from client (code: %d)!\n", ret);
-			ERR_print_errors_fp(stderr);
+		if (bytes_read <= 0) { 
+			if (bytes_read < 0) { // err
+				ret = SSL_get_error(ssl, ret);
+				fprintf(stderr, "Error reading from client (code: %d)!\n", ret);
+				ERR_print_errors_fp(stderr);
+			}
 			
-			ws_client_close(client);
-			goto end;
-		}
-		else if (bytes_read == 0) {
-			ws_client_close(client);
 			goto end;
 		}
 		else if (bytes_read > 0) {
 			ret = parse_frame(&frame, &buffer);
 
-			if (ret) {
-				// TODO: invalid frame... do something
+			if (ret) 
 				goto end;
-			}
 
 			switch(frame.opcode) {
 				case 0x0: // continuation
@@ -160,7 +154,6 @@ static int ws_client_read(ws_client_t *client)
 						 * if we receive payload length greater than MAX_WS_PAYLOAD_LEN we 
 						 * return here to avoid reading further (invalid for us) data chunks
 						 * from the client
-						 * TODO 2 - also we should close the connection for now
 						 */
 						ret = -EMSGSIZE;
 						goto end;
@@ -203,7 +196,6 @@ static int ws_client_read(ws_client_t *client)
 				break;
 
 				case 0x8:
-					ws_client_close(client);
 					goto end;
 				break;
 
@@ -222,6 +214,23 @@ static int ws_client_read(ws_client_t *client)
 	}
 
 end:
+	/*
+	 * since be got here from an infinite loop which doesn`t
+	 * end only if the client left or the client sent us some
+	 * invalid data (or maybe some system error occured, like 
+	 * memory allocation failure), either way we call 
+	 * ws_client_close to close the socket and free the client
+	 */
+	ws_client_close(client);
+	/*
+	 * for why this is here and not in ws_client_close, 
+	 * read the comment in ws_client_close
+	 */
+	if (ssl) {
+		printf("Freeing client SSL...\n");
+		SSL_free(ssl);
+	}
+
 	free(orig_buffer);
 
 	return ret;
@@ -243,8 +252,17 @@ int ws_client_close(ws_client_t *client)
 
 	if (client->ssl) {
 		SSL_shutdown(client->ssl);
+		/*
+		 * we don`t do free here because in ws_client_read there is 
+		 * still an active SSL_read, and if we free client->ssl 
+		 * here, SSL_read may trigger (and it does) a segfault because
+		 * it still tries to read data from a pointer which doesn`t 
+		 * exist anymore
+		 * so we shutdown ssl here, and free the pointer at the end of
+		 * ws_client_read
+		 */
 		//SSL_free(client->ssl);
-		//client->ssl = NULL;
+		client->ssl = NULL;
 	}
 
 	if (client->ops.close)
