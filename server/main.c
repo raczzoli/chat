@@ -19,8 +19,9 @@ int main()
 	 * (or something else) i guess
 	 *
 	 * xxx - solved with mutexes around writes and free-s (needs to be tested)
+	 * ....not working fuck
 	 */
-	// signal(SIGPIPE, SIG_IGN); 
+	signal(SIGPIPE, SIG_IGN); 
 
 	ws_config.port = WSS_PORT;
 	ws_config.ssl_cert_path = WSS_CERT_PATH;
