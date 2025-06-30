@@ -99,7 +99,8 @@ int ws_client_write_text(ws_client_t *client, char *text, uint64_t len)
 end:
 	pthread_mutex_unlock(&client->lock);
 
-	free(buffer);
+	if (buffer)
+		free(buffer);
 
 	return ret;
 }
@@ -133,7 +134,9 @@ static int ws_client_read(ws_client_t *client)
 
 		if (bytes_read <= 0) { 
 			if (bytes_read < 0) { // err
-				ret = SSL_get_error(ssl, ret);
+				client->ssl_error = SSL_get_error(ssl, ret);
+				ret = client->ssl_error;
+
 				fprintf(stderr, "Error reading from client (code: %d)!\n", ret);
 				ERR_print_errors_fp(stderr);
 			}
@@ -273,7 +276,16 @@ int ws_client_close(ws_client_t *client)
 	//client->fd = -1;
 
 	if (client->ssl) {
-		SSL_shutdown(client->ssl);
+		if (!client->ssl_error || client->ssl_error != SSL_ERROR_SYSCALL) {
+			/*
+			 * we only call SSL_shutdown if no ssl_error was set on client, 
+			 * or we have the client->ssl_error set, but it`s value is 
+			 * not SSL_ERROR_SYSCALL. Having this error means the client
+			 * closed the connection without doing the graceful shutdown
+			 * procedure so calling SSL_shutdown will trigger a SIGPIPE error
+			 */
+			SSL_shutdown(client->ssl);
+		}
 		/*
 		 * we don`t do free here because in ws_client_read there is 
 		 * still an active SSL_read, and if we free client->ssl 

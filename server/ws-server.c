@@ -99,6 +99,7 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 	pthread_mutex_init(&client->lock, NULL);
 
 	client->ssl = NULL;
+	client->ssl_error = 0;
 	client->headers = NULL;
 	client->headers_len = 0;
 	client->addr_len = sizeof(struct sockaddr_in);

@@ -40,6 +40,7 @@ struct ws_client_ops {
 struct ws_client {
 	int fd;
 	SSL *ssl;
+	int ssl_error;
 	struct sockaddr_in addr;
 	socklen_t addr_len;
 	char ip[INET_ADDRSTRLEN];
