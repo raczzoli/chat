@@ -302,11 +302,34 @@ int ws_client_close(ws_client_t *client)
 	if (client->ops.close)
 		client->ops.close(client);
 
-	// TODO: handle cleaning up stuff
 end:
 	pthread_mutex_unlock(&client->lock);
 
+	ws_client_free(client);
+
 	return ret;
+}
+
+void ws_client_free(ws_client_t *client)
+{
+	if (client->headers) {
+		for (int i=0;i<client->headers_len;i++) {
+			struct http_header *header = client->headers[i];
+
+			if (header->key)
+				free(header->key);
+			if (header->value)
+				free(header->value);
+
+			free(header);
+		}
+
+		free(client->headers);
+	}
+
+	pthread_mutex_destroy(&client->lock);
+
+	free(client);
 }
 
 static int parse_frame(struct ws_frame *frame, char **buffer)
@@ -387,9 +410,3 @@ static int parse_frame(struct ws_frame *frame, char **buffer)
 	return ret;
 }
 
-void ws_client_free(ws_client_t *client)
-{
-	free(client);
-	// TODO: free headers;
-	// TODO pthread_mutex_destroy(&client->lock);
-}
