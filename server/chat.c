@@ -440,17 +440,13 @@ static void remove_client_from_stacks(struct chat_context *ctx, struct chat_clie
 	struct list_node *node = NULL;
 
 	node = list_get_data_node(&ctx->clients_head, client);
-	if (node) {
+	if (node) 
 		list_remove_node(&ctx->clients_head, node);
-		printf("Client with IP: %s removed from clients stack...\n", client->client->ip);
-	}
 
 	if (client->room) {
 		node = list_get_data_node(&client->room->queue, client);
-		if (node) {
+		if (node) 
 			list_remove_node(&client->room->queue, node);
-			printf("Client with IP: %s removed from waiting room...\n", client->client->ip);
-		}
 	}
 
 	//ctx->waiting_rooms = NULL;
