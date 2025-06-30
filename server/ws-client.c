@@ -27,7 +27,7 @@ int ws_client_write_text(ws_client_t *client, char *text, uint64_t len)
 
 	pthread_mutex_lock(&client->lock);
 
-	if (client->status == CLIENT_DISCONNECTED) {
+	if (client->status == CLIENT_DISCONNECTED || !client->ssl) {
 		ret = -1;
 		goto end;
 	}
@@ -68,6 +68,12 @@ int ws_client_write_text(ws_client_t *client, char *text, uint64_t len)
 	buffer_len = payload_offset + len;
 
 	buffer = malloc(buffer_len);
+
+	if (!buffer) {
+		ret = -ENOMEM;
+		goto end;
+	}
+
 	memset(buffer, 0, buffer_len);
 
 	buffer[0] |= 0x81; // in bin: 10000001 (fin=1, rsv=000 opcode=0001(text))
@@ -91,7 +97,7 @@ int ws_client_write_text(ws_client_t *client, char *text, uint64_t len)
 	}
 
 end:
-	pthread_mutex_lock(&client->lock);
+	pthread_mutex_unlock(&client->lock);
 
 	free(buffer);
 
