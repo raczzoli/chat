@@ -20,6 +20,7 @@ struct chat_client {
 	int gender;
 	int looking_for;
 
+	struct waiting_room *room;
 	struct chat_client *pair;
 };
 

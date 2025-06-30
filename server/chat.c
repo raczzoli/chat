@@ -353,11 +353,14 @@ static struct chat_client *find_match(struct chat_context *ctx, struct chat_clie
 		return NULL;
 
 	// we have a match
-	struct chat_client *first_cli = room->queue->data;
-	list_remove_node(&room->queue, room->queue);
+	struct list_node *first_node = room->queue;
+	struct chat_client *first_cli = first_node->data;
+	list_remove_node(&room->queue, first_node);
 
-	if (first_cli)
+	if (first_cli) {
+		first_cli->room = NULL;
 		return first_cli;
+	}
 
 	return NULL;
 }
@@ -384,6 +387,8 @@ static int add_client_to_waiting_room(struct chat_context *ctx, struct chat_clie
 			client->client->ip, room->gender, room->looking_for);
 		return -1;
 	}
+
+	client->room = room;
 
 	//printf("Client with IP: %s added to waiting room succesfuly (Gender: %d, looking for: %d)...\n", 
 	//		client->client->ip, room->gender, room->looking_for);
@@ -435,10 +440,17 @@ static void remove_client_from_stacks(struct chat_context *ctx, struct chat_clie
 	struct list_node *node = NULL;
 
 	node = list_get_data_node(&ctx->clients_head, client);
-
 	if (node) {
 		list_remove_node(&ctx->clients_head, node);
 		printf("Client with IP: %s removed from clients stack...\n", client->client->ip);
+	}
+
+	if (client->room) {
+		node = list_get_data_node(&client->room->queue, client);
+		if (node) {
+			list_remove_node(&client->room->queue, node);
+			printf("Client with IP: %s removed from waiting room...\n", client->client->ip);
+		}
 	}
 
 	//ctx->waiting_rooms = NULL;
