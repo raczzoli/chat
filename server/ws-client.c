@@ -288,7 +288,7 @@ int ws_client_close(ws_client_t *client)
 end:
 	pthread_mutex_unlock(&client->lock);
 
-	return 0;
+	return ret;
 }
 
 static int parse_frame(struct ws_frame *frame, char **buffer)
