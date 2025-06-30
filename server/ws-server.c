@@ -98,6 +98,7 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 
 	pthread_mutex_init(&client->lock, NULL);
 
+	client->port = 0;
 	client->ssl = NULL;
 	client->ssl_error = 0;
 	client->headers = NULL;
