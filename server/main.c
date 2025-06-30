@@ -12,8 +12,6 @@ struct ws_server_config ws_config;
 
 int main()
 {
-	//signal(SIGPIPE, SIG_IGN); 
-
 	ws_config.port = WSS_PORT;
 	ws_config.ssl_cert_path = WSS_CERT_PATH;
 	ws_config.ssl_key_path = WSS_KEY_PATH;
