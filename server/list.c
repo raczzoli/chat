@@ -39,7 +39,7 @@ int list_remove_node(struct list_node **head, struct list_node *node)
 	
 	h = *head;
 
-	if (!h)
+	if (!h || !node)
 		return -ENOENT;
 
 	if (node->next == node && node->prev == node) {
