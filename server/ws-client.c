@@ -108,22 +108,24 @@ static int ws_client_read(ws_client_t *client)
 	orig_buffer = buffer;
 
 	while (1) {
+		
 		if (client->status == CLIENT_DISCONNECTED || !client->ssl) {
 			ret = 0;
 			goto end;
 		}
 
 		bytes_read = SSL_read(client->ssl, buffer, MAX_WS_BUFFER_LEN);//recv(client->fd, buffer, MAX_WS_BUFFER_LEN, 0);
-		if (bytes_read < 0) {
+		if (bytes_read < 0) { // err
 			ret = SSL_get_error(client->ssl, ret);
 			fprintf(stderr, "Error reading from client (code: %d)!\n", ret);
 			ERR_print_errors_fp(stderr);
 			
-			return ret;
+			ws_client_close(client);
+			goto end;
 		}
 		else if (bytes_read == 0) {
 			ws_client_close(client);
-			break;
+			goto end;
 		}
 		else if (bytes_read > 0) {
 			ret = parse_frame(&frame, &buffer);
@@ -199,6 +201,7 @@ static int ws_client_read(ws_client_t *client)
 
 				case 0x8:
 					ws_client_close(client);
+					goto end;
 				break;
 
 				case 0x9: // PING
@@ -232,14 +235,14 @@ int ws_client_close(ws_client_t *client)
 
 	client->status = CLIENT_DISCONNECTED;
 
+	//close(client->fd);
+	//client->fd = -1;
+
 	if (client->ssl) {
 		SSL_shutdown(client->ssl);
 		SSL_free(client->ssl);
 		client->ssl = NULL;
 	}
-
-	close(client->fd);
-	client->fd = -1;
 
 	if (client->ops.close)
 		client->ops.close(client);
