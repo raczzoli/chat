@@ -115,6 +115,9 @@ static int ws_client_read(ws_client_t *client)
 		}
 
 		bytes_read = SSL_read(client->ssl, buffer, MAX_WS_BUFFER_LEN);//recv(client->fd, buffer, MAX_WS_BUFFER_LEN, 0);
+
+		printf("BYTES READ: %d\n", bytes_read);
+
 		if (bytes_read < 0) { // err
 			ret = SSL_get_error(client->ssl, ret);
 			fprintf(stderr, "Error reading from client (code: %d)!\n", ret);
@@ -240,8 +243,8 @@ int ws_client_close(ws_client_t *client)
 
 	if (client->ssl) {
 		SSL_shutdown(client->ssl);
-		SSL_free(client->ssl);
-		client->ssl = NULL;
+		//SSL_free(client->ssl);
+		//client->ssl = NULL;
 	}
 
 	if (client->ops.close)
