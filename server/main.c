@@ -22,7 +22,7 @@ int main()
 		return -1;
 
 	printf("Chat service created successfuly...\n");
-	printf("Awaiting client connections...\n");
+	printf("Awaiting client connections on port: %d...\n", WSS_PORT);
 
 	chat_init(chat_ctx);
 
