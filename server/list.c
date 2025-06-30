@@ -43,10 +43,18 @@ int list_remove_node(struct list_node **head, struct list_node *node)
 		return -ENOENT;
 
 	if (node->next == node && node->prev == node) {
-		// no more items left in list;
+		/*
+		 * if node next and prev points to itself it means
+		 * the node is also the head, and after removing it
+		 * head will be NULL
+		 */
 		*head = NULL;
 	}
 	else {
+		/*
+		 * if the node is also the head (it is the first element), 
+		 * after removal the head will be the next element
+		 */
 		if (node == h)
 			*head = node->next;
 
