@@ -8,15 +8,37 @@
 #include "ws-client.h"
 
 static int parse_frame(struct ws_frame *frame, char **buffer);
-static int ws_client_read(ws_client_t *client);
+static int ws_client_read_loop(ws_client_t *client);
 
 
 int ws_client_handle(ws_client_t *client)
 {
-	int ret = ws_client_read(client);
+	ws_client_read_loop(client);
 
-	if (ret)
-		return ret;
+	/*
+	 * since be got here from an infinite loop which doesn`t
+	 * end only if the client left or the client sent us some
+	 * invalid data (or maybe some system error occured, like 
+	 * memory allocation failure), either way we call 
+	 * ws_client_close to close the socket and free the client
+	 */
+	ws_client_close(client);
+
+	/*
+	 * for why this is here and not in ws_client_close, 
+	 * read the comment in ws_client_close
+	 */
+	if (client->ssl) {
+		printf("Freeing client SSL...\n");
+		SSL_free(client->ssl);
+		client->ssl = NULL;
+	}
+
+	/*
+	 * at the end freeing the client itself
+	 */
+	if (client) 
+		ws_client_free(client);
 
 	return 0;
 }
@@ -105,14 +127,13 @@ end:
 	return ret;
 }
 
-static int ws_client_read(ws_client_t *client)
+static int ws_client_read_loop(ws_client_t *client)
 {
 	int bytes_read = 0;
 	char *buffer = NULL, *orig_buffer = NULL;
 	struct ws_frame frame;
 	struct ws_data data;
 	int ret = 0;
-	SSL *ssl = client->ssl;
 
 	buffer = malloc(MAX_WS_BUFFER_LEN);
 
@@ -125,16 +146,16 @@ static int ws_client_read(ws_client_t *client)
 
 	while (1) {
 		
-		if (client->status == CLIENT_DISCONNECTED || !ssl) {
+		if (client->status == CLIENT_DISCONNECTED || !client->ssl) {
 			ret = 0;
 			goto end;
 		}
 
-		bytes_read = SSL_read(ssl, buffer, MAX_WS_BUFFER_LEN);//recv(client->fd, buffer, MAX_WS_BUFFER_LEN, 0);
+		bytes_read = SSL_read(client->ssl, buffer, MAX_WS_BUFFER_LEN);//recv(client->fd, buffer, MAX_WS_BUFFER_LEN, 0);
 
 		if (bytes_read <= 0) { 
 			if (bytes_read < 0) { // err
-				client->ssl_error = SSL_get_error(ssl, ret);
+				client->ssl_error = SSL_get_error(client->ssl, ret);
 				ret = client->ssl_error;
 
 				fprintf(stderr, "Error reading from client (code: %d)!\n", ret);
@@ -231,23 +252,6 @@ static int ws_client_read(ws_client_t *client)
 	}
 
 end:
-	/*
-	 * since be got here from an infinite loop which doesn`t
-	 * end only if the client left or the client sent us some
-	 * invalid data (or maybe some system error occured, like 
-	 * memory allocation failure), either way we call 
-	 * ws_client_close to close the socket and free the client
-	 */
-	ws_client_close(client);
-	/*
-	 * for why this is here and not in ws_client_close, 
-	 * read the comment in ws_client_close
-	 */
-	if (ssl) {
-		printf("Freeing client SSL...\n");
-		SSL_free(ssl);
-	}
-
 	free(orig_buffer);
 
 	return ret;
@@ -296,7 +300,6 @@ int ws_client_close(ws_client_t *client)
 		 * ws_client_read
 		 */
 		//SSL_free(client->ssl);
-		client->ssl = NULL;
 	}
 
 	if (client->ops.close)
@@ -305,14 +308,13 @@ int ws_client_close(ws_client_t *client)
 end:
 	pthread_mutex_unlock(&client->lock);
 
-	ws_client_free(client);
-
 	return ret;
 }
 
 void ws_client_free(ws_client_t *client)
 {
 	printf("Freeing client with port: %d\n", client->port);
+
 	if (client->headers) {
 		for (int i=0;i<client->headers_len;i++) {
 			struct http_header *header = client->headers[i];
