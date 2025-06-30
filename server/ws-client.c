@@ -23,10 +23,15 @@ int ws_client_handle(ws_client_t *client)
 
 int ws_client_write_text(ws_client_t *client, char *text, uint64_t len)
 {
-	if (client->status == CLIENT_DISCONNECTED)
-		return -1;
-
 	int ret = 0;
+
+	pthread_mutex_lock(&client->lock);
+
+	if (client->status == CLIENT_DISCONNECTED) {
+		ret = -1;
+		goto end;
+	}
+	
 	char *buffer = NULL;
 	uint64_t buffer_len = 0;
 	int payload_len = 0;
@@ -36,7 +41,8 @@ int ws_client_write_text(ws_client_t *client, char *text, uint64_t len)
 
 	if (len <= 0) {
 		fprintf(stderr, "Invalid data length!\n");
-		return -EINVAL;
+		ret = -EINVAL;
+		goto end;
 	}
 
 	if (len <= 125) {
@@ -85,6 +91,8 @@ int ws_client_write_text(ws_client_t *client, char *text, uint64_t len)
 	}
 
 end:
+	pthread_mutex_lock(&client->lock);
+
 	free(buffer);
 
 	return ret;
@@ -238,14 +246,20 @@ end:
 
 int ws_client_close(ws_client_t *client)
 {
+	int ret = 0;
+
+	pthread_mutex_lock(&client->lock);
+
 	/*
 	 * since we are calling this function when we want 
 	 * to close the connection but also when the client
 	 * left, we add a check here if client already has 
 	 * the status of CLIENT_DISCONNECTED
 	 */
-	if (client->status == CLIENT_DISCONNECTED)
-		return 0;
+	if (client->status == CLIENT_DISCONNECTED) {
+		ret = -1;
+		goto end;
+	}
 
 	client->status = CLIENT_DISCONNECTED;
 
@@ -271,6 +285,8 @@ int ws_client_close(ws_client_t *client)
 		client->ops.close(client);
 
 	// TODO: handle cleaning up stuff
+end:
+	pthread_mutex_unlock(&client->lock);
 
 	return 0;
 }
@@ -357,4 +373,5 @@ void ws_client_free(ws_client_t *client)
 {
 	free(client);
 	// TODO: free headers;
+	// TODO pthread_mutex_destroy(&client->lock);
 }
