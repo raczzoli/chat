@@ -48,7 +48,6 @@ struct ws_client {
 	enum ws_client_statuses status;
 	struct http_header **headers;
 	int headers_len;
-	int is_bot :1;
 	struct ws_client_ops ops;
 	void *owner;
 	pthread_mutex_t lock;

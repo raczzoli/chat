@@ -170,7 +170,7 @@ static void *bot_matcher_thread(void *arg)
 	 * here we check if while sleeping our client 
 	 * got a match or not
 	 */
-	if (!client->pair) 
+	if (client->pair) 
 		goto end;		
 
 	/*
@@ -215,13 +215,14 @@ void chat_init(struct chat_context *ctx)
 				return;
 			}
 
-			printf("%s registered - IP: %s, port: %d...\n", client->is_bot ? "::BOT::": "Client", client->ip, client->port);
-
 			chat_cli->registered = 0;
 			chat_cli->client = client;
 			chat_cli->chat_context = ctx;
 			chat_cli->pair = NULL;
 			chat_cli->room = NULL;
+			chat_cli->is_bot = strcmp(client->ip, "127.0.0.1") == 0;
+
+			printf("%s registered - IP: %s, port: %d...\n", chat_cli->is_bot ? "BOT": "Client", chat_cli->client->ip, chat_cli->client->port);
 
 			client->owner = (void *)chat_cli;
 			client->ops.read = client_read;
@@ -370,7 +371,7 @@ static void handle_client_match(struct chat_client *chat_client)
 	else {
 		add_client_to_waiting_room(chat_client->chat_context, chat_client);
 
-		if (!chat_client->client->is_bot) {
+		if (!chat_client->is_bot) {
 			printf("Starting bot matcher thread...\n");
 			init_bot_matcher_thread(chat_client);
 		}
@@ -388,7 +389,6 @@ static int init_bot_matcher_thread(struct chat_client *chat_client)
 	arg->client = chat_client;
 	
     pthread_create(&thread, NULL, bot_matcher_thread, arg);
-
 	pthread_join(thread, NULL);
 
 	return 0;
@@ -444,13 +444,28 @@ static struct chat_client *find_match_in_room(struct waiting_room *room, int is_
 
 	printf("Looking for bots: %d\n", is_bot);
 
-	struct list_node *first_node = room->queue;
-	struct chat_client *first_cli = first_node->data;
-	list_remove_node(&room->queue, first_node);
+	struct list_node *found_node = NULL;
+	struct list_node *curr = room->queue;
+	struct chat_client *item = NULL;
 
-	if (first_cli) {
-		first_cli->room = NULL;
-		return first_cli;
+	do {
+		item = curr->data;
+
+		if (item->is_bot == is_bot) {
+			found_node = curr;
+			break;
+		}
+
+		curr = curr->next;
+	}
+	while (curr != room->queue);
+
+	struct chat_client *found_cli = found_node->data;
+	list_remove_node(&room->queue, found_node);
+
+	if (found_cli) {
+		found_cli->room = NULL;
+		return found_cli;
 	}
 
 	return NULL;

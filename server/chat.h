@@ -16,6 +16,8 @@ struct chat_client {
 	struct chat_context *chat_context;
 
 	int registered :1;
+	int is_bot :1;
+
 	
 	int gender;
 	int looking_for;
