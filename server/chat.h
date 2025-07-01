@@ -1,6 +1,8 @@
 #ifndef CHAT_H
 #define CHAT_H
 
+#include <stdbool.h>
+
 #include "ws-client.h"
 #include "ws-server.h"
 
@@ -15,8 +17,8 @@ struct chat_client {
 	ws_client_t *client;
 	struct chat_context *chat_context;
 
-	int registered :1;
-	int is_bot;
+	bool registered;
+	bool is_bot;
 	
 	int gender;
 	int looking_for;

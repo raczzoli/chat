@@ -228,9 +228,8 @@ void chat_init(struct chat_context *ctx)
 			chat_cli->chat_context = ctx;
 			chat_cli->pair = NULL;
 			chat_cli->room = NULL;
-			chat_cli->is_bot = strcmp(client->ip, "127.0.0.1") == 0 ? 1 : 0;
+			chat_cli->is_bot = strcmp(client->ip, "127.0.0.1") == 0;
 
-			printf("is bot: %d -----------> %d\n", strcmp(client->ip, "127.0.0.1"), chat_cli->is_bot);
 			printf("%s registered - IP: %s, port: %d...\n", chat_cli->is_bot ? "BOT": "Client", chat_cli->client->ip, chat_cli->client->port);
 
 			client->owner = (void *)chat_cli;
@@ -457,7 +456,6 @@ static struct chat_client *find_match_in_room(struct waiting_room *room, int is_
 
 	do {
 		item = curr->data;
-		printf("fasz %d ... %d\n", item->is_bot, is_bot);
 		if (item->is_bot == is_bot) {
 			found_node = curr;
 			break;
