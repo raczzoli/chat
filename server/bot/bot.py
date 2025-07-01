@@ -11,7 +11,13 @@ import time
 
 SERVER_URL = "wss://localhost:8443"  # ← Replace with your own server
 
-responses_list += [
+responses_list = [
+	{"key": ["szia", "szio", "hali", "hi", "hello", "helo"], "answers": ["Szia", "Szió", "Hali", "Hello"]},
+	{"key": ["hogyvagy"], "answers": ["Jól, köszi!", "Minden oké!", "Remekül!"]},
+	{"key": ["micsi", "mizujs"], "answers": ["Semmi kulonoset, unalom van :))", "Minden oke", "Unalom", "Most ebredtem", "Masztizok :)"]},
+	{"key": ["hanyeves", "eves", "korod"], "answers": ["19", "22", "21", "16", "17"]},
+	{"key": ["hogyvagy"], "answers": ["Koszi, minden ok", "Jol", "Turhetoen", "Minden ok, unalom"]},
+	{"key": ["nemjo"], "answers": ["Hat, ja", "Ugyee :))", "Igen", "Otlet?"]},
 	{"key": ["merre", "honnan", "holvagy"], "answers": ["Valahonnan a netről 😄", "Itt-ott", "Nem számít 😉", "Te hol vagy?"]},
 	{"key": ["mitcsinalsz", "mizu", "mivanez", "mitnyomsz"], "answers": ["Csetelek és unatkozom", "Veled beszélgetek", "Semmi értelmeset", "Nyomom a semmit 😅"]},
 	{"key": ["unalom", "unalmas", "unatkozom"], "answers": ["Same.", "Én is. Találjunk ki vmit?", "Küldj egy viccet!", "Írj vmit random!"]},
