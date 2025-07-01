@@ -234,6 +234,7 @@ static int ws_client_read_loop(ws_client_t *client)
 				break;
 
 				case 0x8:
+					printf("Close frame\n");
 					goto end;
 
 				case 0x9: // PING
