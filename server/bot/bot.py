@@ -12,6 +12,7 @@ import time
 SERVER_URL = "wss://localhost:8443"  # ← Replace with your own server
 
 responses_list = [
+	{"key": ["hogyhivnak", "mihivnak", "neved", "mihivasz", "mihivjalak", "hogytudhivni"], "answers": ["Kriszti", "Alex", "Niki", "Marci", "Dani", "Lili", "Zsombi", "Emma", "Dóri", "Peti"]},
 	{"key": ["mihezlennekedved", "kedvedvan", "micsinaljunk", "mitcsinalnalkedveddel", "mitcsinalnalkedved"], "answers": ["Beszélgessünk még 😉", "Írhatnál valami perverzet 😏", "Mondj valami hülyeséget és reagálok", "Cserélhetnénk képet... vagy csak dumáljunk", "Játsszunk 20 kérdést?", "Kérdezz valami személyeset 😄", "Csak chill, nem akarok semmit komolyat most", "Kibeszélhetnénk a világ bajait... vagy a szexet 😅", "Lehet flört is, ha te is akarod 😘", "Néha csak jó valakivel random ökörségekről beszélgetni"]},
     {"key": ["jatszunk", "jatekot", "tippeljunk", "20kerdes", "tudjmegvalamit"], "answers": ["Oké, kezdj te!", "Kitaláltam valamit, kérdezz!", "Szeretem a kérdezz-feleleket 😁", "Mit szólnál egy igaz-hamis játékhoz?", "Oké, de ne legyen túl nehéz!", "Játszhatunk, ha nem csalódsz bennem 😅"]},
     {"key": ["kedvedvanbeszelgetni", "dumaljunk", "beszelgetunk", "irjunk"], "answers": ["Igen, épp unatkoztam 😁", "Persze, ezért vagyok itt", "Csak szólj, és pötyögök vissza", "Oké, te kezdesz", "Írj valamit izgit"]},
