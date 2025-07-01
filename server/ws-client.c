@@ -237,13 +237,14 @@ static int ws_client_read_loop(ws_client_t *client)
 					printf("Close frame\n");
 					goto end;
 
-				case 0x9: // PING
+				case 0x9: {// PING
 					char pong_buff[2];
 					pong_buff[0] |= 0x8A; // in bin: 10001010 (fin=1, rsv=000 opcode=1010(0xA - pong))
 					pong_buff[1] |= 0x00; // 0 bytes payload
 
 					SSL_write(client->ssl, pong_buff, 2);
 					printf("PING\n");
+				}
 				break;
 
 				case 0xA: // PONG
