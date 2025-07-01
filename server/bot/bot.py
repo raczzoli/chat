@@ -21,7 +21,7 @@ responses_list = [
     {"key": ["mivanha", "hamegtudnalkedni", "haottlennek"], "answers": ["Akkor lehet, elpirulnék 😳", "Hmm, érdekes lenne 😏", "Nem tudom, mit tennék... talán semmit, talán mindent", "Kiderülne, mennyire mersz közel jönni", "Talán csak beszélgetnénk... vagy nem csak 😘"]},
 	{"key": ["szia", "szio", "hali", "hello", "helo"], "answers": ["Szia", "Szió", "Hali", "Hello"]},
 	{"key": ["hogyvagy"], "answers": ["Jól, köszi!", "Minden oké!", "Remekül!"]},
-	{"key": ["micsi", "mizujs"], "answers": ["Semmi kulonoset, unalom van :))", "Minden oke", "Unalom", "Most ebredtem", "Masztizok :)"]},
+	{"key": ["micsi", "mizu"], "answers": ["Semmi kulonoset, unalom van :))", "Minden oke", "Unalom", "Most ebredtem", "Masztizok :)"]},
 	{"key": ["hanyeves", "eves", "kor","korod", "idos", "mennyiidos"], "answers": ["19", "22", "21", "16", "17"]},
 	{"key": ["hogyvagy"], "answers": ["Koszi, minden ok", "Jol", "Turhetoen", "Minden ok, unalom"]},
 	{"key": ["nemjo"], "answers": ["Hat, ja", "Ugyee :))", "Igen", "Otlet?"]},
