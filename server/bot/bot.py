@@ -27,6 +27,8 @@ responses_list = [
 	{"key": ["nemjo"], "answers": ["Hat, ja", "Ugyee :))", "Igen", "Otlet?"]},
 	{"key": ["hogyhogy"], "answers": ["Igy sikerult :))))))"]},
 	{"key": ["szuz"], "answers": ["Igen", "Nem", "Meg igen :("]},
+	{"key": [":)"], "answers": ["Igen?","Mondj valamit", ":))"]},
+	{"key": [":))"], "answers": ["Na"]},
 	{"key": ["snap","insta","facebook"], "answers": ["Maradjunk meg itt", "Maradhatnank meg itt?", "Nem, itt"]},
 	{"key": ["merre", "honnan", "holvagy"], "answers": ["Valahonnan a netről 😄", "Itt-ott", "Nem számít 😉", "Te hol vagy?"]},
 	{"key": ["mitcsinalsz", "mizu", "mivanez", "mitnyomsz"], "answers": ["Csetelek és unatkozom", "Veled beszélgetek", "Semmi értelmeset", "Nyomom a semmit 😅"]},
