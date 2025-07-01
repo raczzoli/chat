@@ -442,8 +442,6 @@ static struct chat_client *find_match_in_room(struct waiting_room *room, int is_
 
 	// we have a match
 
-	printf("Looking for bots: %d\n", is_bot);
-
 	struct list_node *found_node = NULL;
 	struct list_node *curr = room->queue;
 	struct chat_client *item = NULL;
@@ -451,7 +449,6 @@ static struct chat_client *find_match_in_room(struct waiting_room *room, int is_
 	do {
 		item = curr->data;
 
-		printf("%d == %d\n", item->is_bot, is_bot);
 		if (item->is_bot == is_bot) {
 			found_node = curr;
 			break;
