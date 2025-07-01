@@ -245,6 +245,7 @@ static int ws_client_read_loop(ws_client_t *client)
 					 * 2. writing back is similar to a part of ws_client_write_text (it should be 
 					 * a generalized write function which contains the mutexes also, which writes
 					 * frame+data to the socket)
+					 * 3. this case should be unified with the 0x0, 0x1, 0x2 case 
 					 */
 					uint64_t pong_size = 2 + frame.payload_len;
 					char *pong_buff = malloc(pong_size);
