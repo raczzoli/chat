@@ -361,6 +361,7 @@ static int parse_frame(struct ws_frame *frame, char **buffer)
 		case 0x0: // continuation
 		case 0x1: // text
 		case 0x2: // binary
+		case 0x9: // ping
 			buff++;
 
 			/*
