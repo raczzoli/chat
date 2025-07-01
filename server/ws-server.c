@@ -105,6 +105,7 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 	client->headers_len = 0;
 	client->addr_len = sizeof(struct sockaddr_in);
 	client->status = CLIENT_CONNECTED;
+	client->is_bot = 0;
 
 	client->fd = accept(server->fd, (struct sockaddr*)&client->addr, &client->addr_len);
 
@@ -127,6 +128,7 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 
 	inet_ntop(AF_INET, &(client->addr.sin_addr), client->ip, INET_ADDRSTRLEN);
 	client->port = ntohs(client->addr.sin_port);
+	client->is_bot = strcmp(client->ip, "127.0.0.1") == 0;
 
 	ret = handle_client_handshake(client);
 

@@ -15,12 +15,16 @@ static void *chat_client_thread(void *arg);
 static int init_waiting_rooms(struct chat_context *ctx);
 static int register_client(struct chat_context *ctx, struct chat_client *client);
 static struct chat_client *find_match(struct chat_context *ctx, struct chat_client *client);
+static void handle_client_match(struct chat_client *chat_client);
+static void match_clients(struct chat_client *client1, struct chat_client *client2);
 static int add_client_to_waiting_room(struct chat_context *ctx, struct chat_client *client);
 static int gender_string_to_int(const char *g);
 
 // websocket client callbacks
 static void client_read(ws_client_t *client, struct ws_data *data);
 static void client_close(ws_client_t *client);
+// end websocket client callbacks
+
 static void remove_client_from_stacks(struct chat_context *ctx, struct chat_client *client);
 static void free_client(struct chat_client *client);
 
@@ -166,7 +170,7 @@ void chat_init(struct chat_context *ctx)
 				return;
 			}
 
-			printf("Client registered - IP: %s, port: %d...\n", client->ip, client->port);
+			printf("%s registered - IP: %s, port: %d...\n", client->is_bot ? "::BOT::": "Client", client->ip, client->port);
 
 			chat_cli->registered = 0;
 			chat_cli->client = client;
@@ -257,22 +261,7 @@ static void client_read(ws_client_t *client, struct ws_data *data)
 			char *resp_str = "{\"command\":\"register-ok\"}";
 			ws_client_write_text(client, resp_str, strlen(resp_str));
 
-			struct chat_client *matched_cli = NULL;
-			if ((matched_cli = find_match(chat_client->chat_context, chat_client)) != NULL) {
-				matched_cli->pair = chat_client;
-				chat_client->pair = matched_cli;
-
-				printf("Match found between clients with IP-s: %s <=> %s...\n", matched_cli->client->ip, chat_client->client->ip);
-
-				char *resp_str = "{\"command\":\"match-found\"}";
-				int resp_str_len = strlen(resp_str);
-
-				ws_client_write_text(chat_client->client, resp_str, resp_str_len);
-				ws_client_write_text(matched_cli->client, resp_str, resp_str_len);
-			}
-			else {
-				add_client_to_waiting_room(chat_client->chat_context, chat_client);
-			}
+			handle_client_match(chat_client);
 		}
 		else {
 			if (!chat_client->registered) {
@@ -325,6 +314,35 @@ end:
 		json_decref(root);
 
 	return;
+}
+
+static void handle_client_match(struct chat_client *chat_client)
+{
+	struct chat_client *matched_cli = NULL;
+	if ((matched_cli = find_match(chat_client->chat_context, chat_client)) != NULL) {
+		match_clients(chat_client, matched_cli);
+	}
+	else {
+		add_client_to_waiting_room(chat_client->chat_context, chat_client);
+
+		if (!chat_client->client->is_bot) {
+			printf("Starting thread...\n");
+		}
+	}
+}
+
+static void match_clients(struct chat_client *client1, struct chat_client *client2)
+{
+	client2->pair = client1;
+	client1->pair = client2;
+
+	printf("Match found between clients with IP-s: %s <=> %s...\n", client2->client->ip, client1->client->ip);
+
+	char *resp_str = "{\"command\":\"match-found\"}";
+	int resp_str_len = strlen(resp_str);
+
+	ws_client_write_text(client1->client, resp_str, resp_str_len);
+	ws_client_write_text(client2->client, resp_str, resp_str_len);
 }
 
 static int gender_string_to_int(const char *g)
