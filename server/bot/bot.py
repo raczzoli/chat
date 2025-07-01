@@ -41,7 +41,6 @@ async def handle_server_response(ws, raw: str):
 				"text": response
 			}
 		}))
-		print("Sent response:", response)
 	elif command == "message":
 		await handle_chat_message(ws, params);
 	else:
