@@ -190,6 +190,9 @@ static void *bot_matcher_thread(void *arg)
 		list_remove_node(&room->queue, cnode);
 		match_clients(client, bot);
 	}
+	else {
+		printf("No bot found in waiting room after sleep!\n");
+	}
 
 end:
 	return NULL;
