@@ -13,7 +13,7 @@ SERVER_URL = "wss://localhost:8443"  # ← Replace with your own server
 responses_list = [
 	{"key": ["szia", "szio", "hali", "hi", "hello", "helo"], "answers": ["Szia", "Szió", "Hali", "Hello"]},
 	{"key": ["hogyvagy"], "answers": ["Jól, köszi!", "Minden oké!", "Remekül!"]},
-	{"key": ["micsi", "mizujs"], "answers": ["Semmi kulonoset, unalom van :))", "Minden oke", "Unalom", "Most ebredtem"]},
+	{"key": ["micsi", "mizujs"], "answers": ["Semmi kulonoset, unalom van :))", "Minden oke", "Unalom", "Most ebredtem", "Masztizok :)"]},
 	{"key": ["hanyeves", "eves", "korod"], "answers": ["19", "22", "21", "16", "17"]},
 	{"key": ["hogyvagy"], "answers": ["Koszi, minden ok", "Jol", "Turhetoen", "Minden ok, unalom"]},
 ]
