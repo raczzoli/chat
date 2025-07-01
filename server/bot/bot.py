@@ -30,6 +30,7 @@ responses_list = [
 	{"key": [":)"], "answers": ["Igen?","Mondj valamit", ":))"]},
 	{"key": [":))"], "answers": ["Na"]},
 	{"key": ["Jó","jo"], "answers": ["Klasz"]},
+	{"key": ["kanos", "kanosvagyok"], "answers": ["En most nem", "Kicsit en is", "En is"]},
 	{"key": ["verem"], "answers": ["Az jo :)", "Es, hogy megy?", "Az nem rossz"]},
 	{"key": ["megdughatlak","megduhatnalak"], "answers": [""]},
 	{"key": ["snap","insta","facebook"], "answers": ["Maradjunk meg itt", "Maradhatnank meg itt?", "Nem, itt"]},
@@ -55,7 +56,7 @@ responses_list = [
 	{"key": ["vagyitt", "beszelsz", "elertel"], "answers": ["Itt vagyok, sajnos 😅", "Hallak", "Kicsit akadozok, de igen", "Működöm (néha)"]},
 ]
 
-default_responses = [":)","Na, de meselj valamit","Es te, hogy vagy?","Te micsi?","Meselj, milyen napod volt?"]
+default_responses = [":)", ":P", "hmmm"] #,"Na, de meselj valamit","Es te, hogy vagy?","Te micsi?","Meselj, milyen napod volt?"
 
 # Global task list and bot ID counter
 tasks = []
