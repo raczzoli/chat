@@ -21,14 +21,29 @@ tasks = []
 bot_id_counter = 0
 
 
-async def handle_chat_message(ws, raw: dict):
-	print("Received chat message:", dict)
-	await ws.send(json.dumps({
-			"command": "message",
-			"params": {
-				"text": "hello world"
-			}
-		}))
+async def handle_chat_message(ws, obj: dict):
+    text = obj.get("text", "")
+    text = text.lower().strip()  # kisbetű + szóközök eltávolítása
+
+    print("Received chat message:", text)
+
+    response_text = "Szia"  # default válasz
+
+    for entry in responses_list:
+        for key in entry["key"]:
+            if key in clean_text:
+                response_text = random.choice(entry["answers"])
+                break
+        else:
+            continue
+        break
+
+    await ws.send(json.dumps({
+        "command": "message",
+        "params": {
+            "text": response_text
+        }
+    }))
 
 async def handle_server_response(ws, raw: str):
 	try:
