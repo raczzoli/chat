@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <time.h>
+#include <unistd.h>
 #include <pthread.h>
 
 #include "r89.h"
@@ -10,6 +12,7 @@
 #include "jansson.h"
 
 static void start_client_thread(struct chat_context *ctx, struct chat_client *client);
+static int init_bot_matcher_thread(struct chat_client *chat_client);
 static void *chat_client_thread(void *arg);
 
 static int init_waiting_rooms(struct chat_context *ctx);
@@ -150,6 +153,22 @@ static void *chat_client_thread(void *arg)
 
 	free(t_arg);
 
+	return NULL;
+}
+
+static void *bot_matcher_thread(void *arg)
+{
+	struct chat_thread_arg *t_arg = arg;
+	struct chat_client *client = t_arg->client;
+
+	int seconds = (rand() % 4) + 1; // random number between 1 and 4
+	printf("Bot matcher started...\n");
+	sleep(seconds);
+
+	printf("Bot matcher ended after %d seconds...\n", seconds);
+	if (!client->pair) 
+		printf("Client still doesn`t have a match...\n");
+	
 	return NULL;
 }
 
@@ -326,9 +345,27 @@ static void handle_client_match(struct chat_client *chat_client)
 		add_client_to_waiting_room(chat_client->chat_context, chat_client);
 
 		if (!chat_client->client->is_bot) {
-			printf("Starting thread...\n");
+			printf("Starting bot matcher thread...\n");
+			init_bot_matcher_thread(chat_client);
 		}
 	}
+}
+
+static int init_bot_matcher_thread(struct chat_client *chat_client)
+{
+	pthread_t thread;
+
+	struct chat_thread_arg *arg = malloc(sizeof(struct chat_thread_arg));
+	if (!arg) 
+		return -ENOMEM;
+
+	arg->client = chat_client;
+	
+    pthread_create(&thread, NULL, bot_matcher_thread, arg);
+
+	pthread_join(thread, NULL);
+
+	return 0;
 }
 
 static void match_clients(struct chat_client *client1, struct chat_client *client2)
