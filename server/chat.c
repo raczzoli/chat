@@ -17,7 +17,8 @@ static void *chat_client_thread(void *arg);
 
 static int init_waiting_rooms(struct chat_context *ctx);
 static int register_client(struct chat_context *ctx, struct chat_client *client);
-static struct chat_client *find_match(struct chat_context *ctx, struct chat_client *client);
+static struct chat_client *find_match(struct chat_context *ctx, struct chat_client *client, int is_bot);
+static struct chat_client *find_match_in_room(struct waiting_room *room, int is_bot);
 static void handle_client_match(struct chat_client *chat_client);
 static void match_clients(struct chat_client *client1, struct chat_client *client2);
 static int add_client_to_waiting_room(struct chat_context *ctx, struct chat_client *client);
@@ -160,15 +161,37 @@ static void *bot_matcher_thread(void *arg)
 {
 	struct chat_thread_arg *t_arg = arg;
 	struct chat_client *client = t_arg->client;
+	struct waiting_room *room = NULL;
 
 	int seconds = (rand() % 4) + 1; // random number between 1 and 4
-	printf("Bot matcher started...\n");
 	sleep(seconds);
 
-	printf("Bot matcher ended after %d seconds...\n", seconds);
+	/*
+	 * here we check if while sleeping our client 
+	 * got a match or not
+	 */
 	if (!client->pair) 
-		printf("Client still doesn`t have a match...\n");
-	
+		goto end;		
+
+	/*
+	 * if not, we call find_match again, but this time
+	 * we look for bots, and pick the first one, and match
+	 * out client with that bot
+	 */
+	room = client->room;
+	struct chat_client *bot = find_match_in_room(room, 1);
+
+	/*
+	 * since we always have bots in waiting queues it shouldn`t happen
+	 * for "bot" to be NULL, but still checking it for safety
+	 */
+	if (bot) {
+		struct list_node *cnode = list_get_data_node(&room->queue, client);
+		list_remove_node(&room->queue, cnode);
+		match_clients(client, bot);
+	}
+
+end:
 	return NULL;
 }
 
@@ -338,7 +361,7 @@ end:
 static void handle_client_match(struct chat_client *chat_client)
 {
 	struct chat_client *matched_cli = NULL;
-	if ((matched_cli = find_match(chat_client->chat_context, chat_client)) != NULL) {
+	if ((matched_cli = find_match(chat_client->chat_context, chat_client, 0)) != NULL) {
 		match_clients(chat_client, matched_cli);
 	}
 	else {
@@ -394,7 +417,7 @@ static int gender_string_to_int(const char *g)
 	return 0;
 }
 
-static struct chat_client *find_match(struct chat_context *ctx, struct chat_client *client)
+static struct chat_client *find_match(struct chat_context *ctx, struct chat_client *client, int is_bot)
 {
 	struct waiting_room *room = NULL;
 
@@ -406,10 +429,18 @@ static struct chat_client *find_match(struct chat_context *ctx, struct chat_clie
 		}
 	}
 
+	return find_match_in_room(room, is_bot);
+}
+
+static struct chat_client *find_match_in_room(struct waiting_room *room, int is_bot)
+{
 	if (!room || !room->queue)
 		return NULL;
 
 	// we have a match
+
+	printf("Looking for bots: %d\n", is_bot);
+
 	struct list_node *first_node = room->queue;
 	struct chat_client *first_cli = first_node->data;
 	list_remove_node(&room->queue, first_node);
