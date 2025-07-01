@@ -243,7 +243,7 @@ static int ws_client_read_loop(ws_client_t *client)
 					pong_buff[1] = 0x00; // 0 bytes payload
 
 					int written_plm = SSL_write(client->ssl, pong_buff, 2);
-					printf("PING ... written: %d\n", written_plm);
+					printf("PING ... payload len: %ld\n", frame.payload_len);
 				}
 				break;
 
