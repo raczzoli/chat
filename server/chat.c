@@ -198,9 +198,6 @@ static void *bot_matcher_thread(void *arg)
 		
 		match_clients(client, bot);
 	}
-	else {
-		printf("No bot found in waiting room after sleep!\n");
-	}
 
 end:
 	return NULL;
@@ -379,10 +376,12 @@ static void handle_client_match(struct chat_client *chat_client)
 	else {
 		add_client_to_waiting_room(chat_client->chat_context, chat_client);
 
-		if (!chat_client->is_bot) {
-			printf("Starting bot matcher thread...\n");
+		/*
+		 * we only start the thread which will eventually match a client with a bot
+		 * only if the connected client is not him/herself a bot (obviously)
+		 */
+		if (!chat_client->is_bot) 
 			init_bot_matcher_thread(chat_client);
-		}
 	}
 }
 
