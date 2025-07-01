@@ -12,10 +12,16 @@ import time
 SERVER_URL = "wss://localhost:8443"  # ← Replace with your own server
 
 responses_list = [
+	{"key": ["mihezlennekedved", "kedvedvan", "micsinaljunk", "mitcsinalnalkedveddel", "mitcsinalnalkedved"], "answers": ["Beszélgessünk még 😉", "Írhatnál valami perverzet 😏", "Mondj valami hülyeséget és reagálok", "Cserélhetnénk képet... vagy csak dumáljunk", "Játsszunk 20 kérdést?", "Kérdezz valami személyeset 😄", "Csak chill, nem akarok semmit komolyat most", "Kibeszélhetnénk a világ bajait... vagy a szexet 😅", "Lehet flört is, ha te is akarod 😘", "Néha csak jó valakivel random ökörségekről beszélgetni"]},
+    {"key": ["jatszunk", "jatekot", "tippeljunk", "20kerdes", "tudjmegvalamit"], "answers": ["Oké, kezdj te!", "Kitaláltam valamit, kérdezz!", "Szeretem a kérdezz-feleleket 😁", "Mit szólnál egy igaz-hamis játékhoz?", "Oké, de ne legyen túl nehéz!", "Játszhatunk, ha nem csalódsz bennem 😅"]},
+    {"key": ["kedvedvanbeszelgetni", "dumaljunk", "beszelgetunk", "irjunk"], "answers": ["Igen, épp unatkoztam 😁", "Persze, ezért vagyok itt", "Csak szólj, és pötyögök vissza", "Oké, te kezdesz", "Írj valamit izgit"]},
+    {"key": ["kedvedvanhozzam", "akarod", "lenneked", "vagyhozzam"], "answers": ["Talán 😉", "Majd kiderül 😏", "Attól függ, mit mondasz még", "Lehet, de ne siessünk", "Te mit szeretnél?"]},
+    {"key": ["mitszeretszcsinalni", "szabadidoben", "hobbid", "mitszeretsz"], "answers": ["Sokat netezem, túl sokat 😅", "Szeretek csak így random csetelni emberekkel", "Zenét hallgatok, sorozat, semmi extra", "Ha jó a beszélgetőpartner, az elég 😁", "Ne kérdezz ilyen komolyakat 😄"]},
+    {"key": ["mivanha", "hamegtudnalkedni", "haottlennek"], "answers": ["Akkor lehet, elpirulnék 😳", "Hmm, érdekes lenne 😏", "Nem tudom, mit tennék... talán semmit, talán mindent", "Kiderülne, mennyire mersz közel jönni", "Talán csak beszélgetnénk... vagy nem csak 😘"]}
 	{"key": ["szia", "szio", "hali", "hi", "hello", "helo"], "answers": ["Szia", "Szió", "Hali", "Hello"]},
 	{"key": ["hogyvagy"], "answers": ["Jól, köszi!", "Minden oké!", "Remekül!"]},
 	{"key": ["micsi", "mizujs"], "answers": ["Semmi kulonoset, unalom van :))", "Minden oke", "Unalom", "Most ebredtem", "Masztizok :)"]},
-	{"key": ["hanyeves", "eves", "korod"], "answers": ["19", "22", "21", "16", "17"]},
+	{"key": ["hanyeves", "eves", "korod", "idos", "mennyiidos"], "answers": ["19", "22", "21", "16", "17"]},
 	{"key": ["hogyvagy"], "answers": ["Koszi, minden ok", "Jol", "Turhetoen", "Minden ok, unalom"]},
 	{"key": ["nemjo"], "answers": ["Hat, ja", "Ugyee :))", "Igen", "Otlet?"]},
 	{"key": ["merre", "honnan", "holvagy"], "answers": ["Valahonnan a netről 😄", "Itt-ott", "Nem számít 😉", "Te hol vagy?"]},
