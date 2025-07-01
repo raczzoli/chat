@@ -58,12 +58,12 @@ async def handle_chat_message(ws, obj: dict):
 
 	await asyncio.sleep(random.uniform(3, 5))
 
-    await ws.send(json.dumps({
-        "command": "message",
-        "params": {
-            "text": response_text
-        }
-    }))
+	await ws.send(json.dumps({
+		"command": "message",
+		"params": {
+			"text": response_text
+		}
+	}))
 
 async def handle_server_response(ws, raw: str):
 	try:
