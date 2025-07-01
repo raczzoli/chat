@@ -17,7 +17,7 @@ int main()
 	 * SIGPIPE errors thrown by the OpenSSL
 	 * library
 	 */
-	//signal(SIGPIPE, SIG_IGN); 
+	signal(SIGPIPE, SIG_IGN); 
 
 	ws_config.port = WSS_PORT;
 	ws_config.ssl_cert_path = WSS_CERT_PATH;
