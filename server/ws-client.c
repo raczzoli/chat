@@ -244,7 +244,7 @@ static int ws_client_read_loop(ws_client_t *client)
 
 					if (pong_buff) {
 						pong_buff[0] = 0x8A; // in bin: 10001010 (fin=1, rsv=000 opcode=1010(0xA - pong))
-						pong_buff[1] = 0x00; // 0 bytes payload
+						pong_buff[1] = 0x00 | frame.payload_len; 
 
 						if (frame.payload_len > 0) {
 							if (frame.is_masked > 0) {
