@@ -31,7 +31,7 @@ async def handle_chat_message(ws, obj: dict):
 
     for entry in responses_list:
         for key in entry["key"]:
-            if key in clean_text:
+            if key in text:
                 response_text = random.choice(entry["answers"])
                 break
         else:
