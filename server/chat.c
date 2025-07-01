@@ -230,7 +230,8 @@ void chat_init(struct chat_context *ctx)
 			chat_cli->room = NULL;
 			chat_cli->is_bot = strcmp(client->ip, "127.0.0.1") == 0;
 
-			printf("%s (%d) registered - IP: %s, port: %d...\n", chat_cli->is_bot ? "BOT": "Client", chat_cli->is_bot, chat_cli->client->ip, chat_cli->client->port);
+			printf("is bot: %d\n", chat_cli->is_bot);
+			printf("%s registered - IP: %s, port: %d...\n", chat_cli->is_bot ? "BOT": "Client", chat_cli->client->ip, chat_cli->client->port);
 
 			client->owner = (void *)chat_cli;
 			client->ops.read = client_read;
