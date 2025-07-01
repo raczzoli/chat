@@ -456,9 +456,8 @@ static struct chat_client *find_match_in_room(struct waiting_room *room, int is_
 
 	do {
 		item = curr->data;
-		printf("fasz...\n");
+		printf("fasz %d ... %d\n", item->is_bot, is_bot);
 		if (item->is_bot == is_bot) {
-			printf("fasz found\n");
 			found_node = curr;
 			break;
 		}
