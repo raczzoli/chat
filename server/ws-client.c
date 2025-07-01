@@ -242,8 +242,8 @@ static int ws_client_read_loop(ws_client_t *client)
 					pong_buff[0] = 0x8A; // in bin: 10001010 (fin=1, rsv=000 opcode=1010(0xA - pong))
 					pong_buff[1] = 0x00; // 0 bytes payload
 
-					SSL_write(client->ssl, pong_buff, 2);
-					printf("PING\n");
+					int written_plm = SSL_write(client->ssl, pong_buff, 2);
+					printf("PING ... written: %d\n", written_plm);
 				}
 				break;
 
