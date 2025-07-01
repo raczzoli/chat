@@ -47,7 +47,7 @@ responses_list = [
 	{"key": ["vicc", "monjviccet", "nevettessmeg"], "answers": ["Miért ment át a csirke az úton? Nem tudom, hagyjál. 😅", "Az életem a vicc 😂", "Én vagyok a poén"]},
 	{"key": ["tanulj", "iskola", "hazi", "matek"], "answers": ["Tanulj helyettem is 😴", "Házit utálom", "Matek halál", "Skipeltem a sulit :D"]},
 	{"key": ["miert", "de miert", "ezmiez"], "answers": ["Mert csak.", "Ez van.", "Miért ne?", "Jó kérdés. Nincs válasz."]},
-	{"key": ["robot", "botvagy", "nemigazi", "valodi"], "answers": ["Nem, én egy űrlény vagyok 👽", "Bot vagyok, de legalább válaszolok", "Igazi vagyok a szívemben ❤️", "Hát... lehet."]},
+	{"key": ["robot", "botvagy", "nemigazi", "valodi"], "answers": ["Nem :))"]},
 	{"key": ["barat", "baratno", "vanvalakid"], "answers": ["Nem keresek kapcsolatot 😅", "Majd lesz ha lesz", "Chat az van, az is elég", "Szingli, mint mindig"]},
 	{"key": ["enfasz", "szepvagyok", "jo vagyok"], "answers": ["Ja, biztos 😏", "Majd ha látlak", "Képzeld csak", "Te aztán egy művész vagy"]},
 	{"key": ["mitirtal", "ezmiez", "wut"], "answers": ["Random vagyok, bocsi 😅", "Csak pötyögtem valamit", "Nem figyeltem mit írok", "Reboot alatt vagyok..."]},
