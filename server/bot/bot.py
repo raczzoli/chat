@@ -54,7 +54,7 @@ bot_id_counter = 0
 
 async def handle_chat_message(ws, obj: dict):
 	text = obj.get("text", "")
-	text = text.lower().strip()  # kisbetű + szóközök eltávolítása
+	text = text.lower().replace(" ", "")  # kisbetű + szóközök eltávolítása
 
 	print("Received chat message:", text)
 
