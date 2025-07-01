@@ -2,14 +2,14 @@
       box-sizing: border-box;
     }
     body, html {
-      margin: 0; padding: 0; height: 100%;
+      margin: 0; padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #f5f7fa;
       color: #333;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
+	  height: -webkit-fill-available;
     }
 
     .container {
@@ -27,7 +27,7 @@
     #step5.container-fullscreen {
       background: #ffffff;
       width: 100vw !important;
-      height: 100vh;
+	  height: -webkit-fill-available;
       max-width: none;
       border-radius: 0;
       padding: 0;
