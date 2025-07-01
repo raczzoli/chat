@@ -30,6 +30,7 @@ responses_list = [
 	{"key": [":)"], "answers": ["Igen?","Mondj valamit", ":))"]},
 	{"key": [":))"], "answers": ["Na"]},
 	{"key": ["Jó","jo"], "answers": ["Klasz"]},
+	{"key": ["hetero","bi"], "answers": ["Bi","Igen","Meleg"]},
 	{"key": ["kanos", "kanosvagyok"], "answers": ["En most nem", "Kicsit en is", "En is"]},
 	{"key": ["verem"], "answers": ["Az jo :)", "Es, hogy megy?", "Az nem rossz"]},
 	{"key": ["megdughatlak","megduhatnalak"], "answers": [""]},
