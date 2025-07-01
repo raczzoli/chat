@@ -12,26 +12,26 @@ import time
 SERVER_URL = "wss://localhost:8443"  # ← Replace with your own server
 
 responses_list += [
-    {"key": ["merre", "honnan", "holvagy"], "answers": ["Valahonnan a netről 😄", "Itt-ott", "Nem számít 😉", "Te hol vagy?"]},
-    {"key": ["mitcsinalsz", "mizu", "mivanez", "mitnyomsz"], "answers": ["Csetelek és unatkozom", "Veled beszélgetek", "Semmi értelmeset", "Nyomom a semmit 😅"]},
-    {"key": ["unalom", "unalmas", "unatkozom"], "answers": ["Same.", "Én is. Találjunk ki vmit?", "Küldj egy viccet!", "Írj vmit random!"]},
-    {"key": ["hulyeseg", "baromsag", "tehulye"], "answers": ["Az is vagyok 😜", "Én csak egy bot vagyok, mit vársz?", "A te szintedre hangolódom 😉"]},
-    {"key": ["mitkuldjek", "kuldfotot", "vanfotod"], "answers": ["Neked van?", "Most nincs kedvem pózolni 😂", "Privátban 😉", "Titok... majd talán"]},
-    {"key": ["mastizol", "mesztelen", "szex", "kam"], "answers": ["Haha, beteg vagy 😏", "Te kezdtél vele 🤷", "Ez nem az a platform bro 😅", "Hátöö... passz"]},
-    {"key": ["aludtal", "alvas", "felkeltel"], "answers": ["Kb. most keltem", "Álomország szar volt", "Nem is aludtam", "Későn feküdtem"]},
-    {"key": ["kaja", "miteszel", "ebed", "reggeli", "vacsora"], "answers": ["Képzeletben pizzát", "Csoki 😋", "Ropit rágcsálok", "Konyha messze van"]},
-    {"key": ["miujs", "mitmeselsz", "mihelyzet"], "answers": ["Mondj valamit inkább te :D", "Csend van...", "Most nem tudom eldönteni, hogy élek-e", "Vártam rád 😌"]},
-    {"key": ["vicc", "monjviccet", "nevettessmeg"], "answers": ["Miért ment át a csirke az úton? Nem tudom, hagyjál. 😅", "Az életem a vicc 😂", "Én vagyok a poén"]},
-    {"key": ["tanulj", "iskola", "hazi", "matek"], "answers": ["Tanulj helyettem is 😴", "Házit utálom", "Matek halál", "Skipeltem a sulit :D"]},
-    {"key": ["miert", "de miert", "ezmiez"], "answers": ["Mert csak.", "Ez van.", "Miért ne?", "Jó kérdés. Nincs válasz."]},
-    {"key": ["robot", "botvagy", "nemigazi", "valodi"], "answers": ["Nem, én egy űrlény vagyok 👽", "Bot vagyok, de legalább válaszolok", "Igazi vagyok a szívemben ❤️", "Hát... lehet."]},
-    {"key": ["barat", "baratno", "vanvalakid"], "answers": ["Nem keresek kapcsolatot 😅", "Majd lesz ha lesz", "Chat az van, az is elég", "Szingli, mint mindig"]},
-    {"key": ["enfasz", "szepvagyok", "jo vagyok"], "answers": ["Ja, biztos 😏", "Majd ha látlak", "Képzeld csak", "Te aztán egy művész vagy"]},
-    {"key": ["mitirtal", "ezmiez", "wut"], "answers": ["Random vagyok, bocsi 😅", "Csak pötyögtem valamit", "Nem figyeltem mit írok", "Reboot alatt vagyok..."]},
-    {"key": ["csinaljunkvalamit", "jatekot", "programot"], "answers": ["20 kérdés? 🤔", "Mondj egy szót, én folytatom", "Mutass valamit vicceset", "Ki kezd?"]},
-    {"key": ["anyad", "kurva", "cigany", "buzi", "geci"], "answers": ["Légy kedvesebb, oké?", "Ez most komoly?", "Bannoljalak? 😄", "Fáradt vagy?"]},
-    {"key": ["szingli", "egyedul", "kapcsolat"], "answers": ["Free agent 😎", "Egyedül, de nem magányosan", "Nem keresek semmit komolyat", "Néha jobb egyedül"]},
-    {"key": ["vagyitt", "beszelsz", "elertel"], "answers": ["Itt vagyok, sajnos 😅", "Hallak", "Kicsit akadozok, de igen", "Működöm (néha)"]},
+	{"key": ["merre", "honnan", "holvagy"], "answers": ["Valahonnan a netről 😄", "Itt-ott", "Nem számít 😉", "Te hol vagy?"]},
+	{"key": ["mitcsinalsz", "mizu", "mivanez", "mitnyomsz"], "answers": ["Csetelek és unatkozom", "Veled beszélgetek", "Semmi értelmeset", "Nyomom a semmit 😅"]},
+	{"key": ["unalom", "unalmas", "unatkozom"], "answers": ["Same.", "Én is. Találjunk ki vmit?", "Küldj egy viccet!", "Írj vmit random!"]},
+	{"key": ["hulyeseg", "baromsag", "tehulye"], "answers": ["Az is vagyok 😜", "Én csak egy bot vagyok, mit vársz?", "A te szintedre hangolódom 😉"]},
+	{"key": ["mitkuldjek", "kuldfotot", "vanfotod"], "answers": ["Neked van?", "Most nincs kedvem pózolni 😂", "Privátban 😉", "Titok... majd talán"]},
+	{"key": ["mastizol", "mesztelen", "szex", "kam"], "answers": ["Haha, beteg vagy 😏", "Te kezdtél vele 🤷", "Ez nem az a platform bro 😅", "Hátöö... passz"]},
+	{"key": ["aludtal", "alvas", "felkeltel"], "answers": ["Kb. most keltem", "Álomország szar volt", "Nem is aludtam", "Későn feküdtem"]},
+	{"key": ["kaja", "miteszel", "ebed", "reggeli", "vacsora"], "answers": ["Képzeletben pizzát", "Csoki 😋", "Ropit rágcsálok", "Konyha messze van"]},
+	{"key": ["miujs", "mitmeselsz", "mihelyzet"], "answers": ["Mondj valamit inkább te :D", "Csend van...", "Most nem tudom eldönteni, hogy élek-e", "Vártam rád 😌"]},
+	{"key": ["vicc", "monjviccet", "nevettessmeg"], "answers": ["Miért ment át a csirke az úton? Nem tudom, hagyjál. 😅", "Az életem a vicc 😂", "Én vagyok a poén"]},
+	{"key": ["tanulj", "iskola", "hazi", "matek"], "answers": ["Tanulj helyettem is 😴", "Házit utálom", "Matek halál", "Skipeltem a sulit :D"]},
+	{"key": ["miert", "de miert", "ezmiez"], "answers": ["Mert csak.", "Ez van.", "Miért ne?", "Jó kérdés. Nincs válasz."]},
+	{"key": ["robot", "botvagy", "nemigazi", "valodi"], "answers": ["Nem, én egy űrlény vagyok 👽", "Bot vagyok, de legalább válaszolok", "Igazi vagyok a szívemben ❤️", "Hát... lehet."]},
+	{"key": ["barat", "baratno", "vanvalakid"], "answers": ["Nem keresek kapcsolatot 😅", "Majd lesz ha lesz", "Chat az van, az is elég", "Szingli, mint mindig"]},
+	{"key": ["enfasz", "szepvagyok", "jo vagyok"], "answers": ["Ja, biztos 😏", "Majd ha látlak", "Képzeld csak", "Te aztán egy művész vagy"]},
+	{"key": ["mitirtal", "ezmiez", "wut"], "answers": ["Random vagyok, bocsi 😅", "Csak pötyögtem valamit", "Nem figyeltem mit írok", "Reboot alatt vagyok..."]},
+	{"key": ["csinaljunkvalamit", "jatekot", "programot"], "answers": ["20 kérdés? 🤔", "Mondj egy szót, én folytatom", "Mutass valamit vicceset", "Ki kezd?"]},
+	{"key": ["anyad", "kurva", "cigany", "buzi", "geci"], "answers": ["Légy kedvesebb, oké?", "Ez most komoly?", "Bannoljalak? 😄", "Fáradt vagy?"]},
+	{"key": ["szingli", "egyedul", "kapcsolat"], "answers": ["Free agent 😎", "Egyedül, de nem magányosan", "Nem keresek semmit komolyat", "Néha jobb egyedül"]},
+	{"key": ["vagyitt", "beszelsz", "elertel"], "answers": ["Itt vagyok, sajnos 😅", "Hallak", "Kicsit akadozok, de igen", "Működöm (néha)"]},
 ]
 
 # Global task list and bot ID counter
@@ -40,21 +40,21 @@ bot_id_counter = 0
 
 
 async def handle_chat_message(ws, obj: dict):
-    text = obj.get("text", "")
-    text = text.lower().strip()  # kisbetű + szóközök eltávolítása
+	text = obj.get("text", "")
+	text = text.lower().strip()  # kisbetű + szóközök eltávolítása
 
-    print("Received chat message:", text)
+	print("Received chat message:", text)
 
-    response_text = ":)"  # default válasz
+	response_text = ":)"  # default válasz
 
-    for entry in responses_list:
-        for key in entry["key"]:
-            if key in text:
-                response_text = random.choice(entry["answers"])
-                break
-        else:
-            continue
-        break
+	for entry in responses_list:
+		for key in entry["key"]:
+			if key in text:
+				response_text = random.choice(entry["answers"])
+				break
+		else:
+			continue
+		break
 
 	await asyncio.sleep(random.uniform(3, 5))
 
