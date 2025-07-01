@@ -505,8 +505,8 @@ static int add_client_to_waiting_room(struct chat_context *ctx, struct chat_clie
 
 	client->room = room;
 
-	//printf("Client with IP: %s added to waiting room succesfuly (Gender: %d, looking for: %d)...\n", 
-	//		client->client->ip, room->gender, room->looking_for);
+	printf("Client with IP: %s added to waiting room succesfuly ::: bot: %d (Gender: %d, looking for: %d)...\n", 
+			client->client->ip, client->is_bot, room->gender, room->looking_for);
 
 	return 0;
 }
