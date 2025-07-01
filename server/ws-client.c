@@ -238,11 +238,27 @@ static int ws_client_read_loop(ws_client_t *client)
 					goto end;
 
 				case 0x9: {// PING
-					char pong_buff[2];
-					pong_buff[0] = 0x8A; // in bin: 10001010 (fin=1, rsv=000 opcode=1010(0xA - pong))
-					pong_buff[1] = 0x00; // 0 bytes payload
+					uint64_t pong_size = 2 + frame.payload_len;
+					char *pong_buff = malloc(pong_size);
+					int written_plm = 0;
 
-					int written_plm = SSL_write(client->ssl, pong_buff, 2);
+					if (pong_buff) {
+						pong_buff[0] = 0x8A; // in bin: 10001010 (fin=1, rsv=000 opcode=1010(0xA - pong))
+						pong_buff[1] = 0x00; // 0 bytes payload
+
+						if (frame.payload_len > 0) {
+							if (frame.is_masked > 0) {
+								for (uint64_t i=0;i<frame.payload_len;i++) {
+									buffer[i] ^= frame.masking_key[i%4];
+								}
+							}
+						}
+
+						memcpy(pong_buff+2, buffer, frame.payload_len);
+
+						written_plm = SSL_write(client->ssl, pong_buff, pong_size);
+					}
+
 					printf("PING ... payload len: %ld\n", frame.payload_len);
 				}
 				break;
