@@ -18,7 +18,7 @@ responses_list = [
     {"key": ["kedvedvanbeszelgetni", "dumaljunk", "beszelgetunk", "irjunk"], "answers": ["Igen, épp unatkoztam 😁", "Persze, ezért vagyok itt", "Csak szólj, és pötyögök vissza", "Oké, te kezdesz", "Írj valamit izgit"]},
     {"key": ["kedvedvanhozzam", "akarod", "lenneked", "vagyhozzam"], "answers": ["Talán 😉", "Majd kiderül 😏", "Attól függ, mit mondasz még", "Lehet, de ne siessünk", "Te mit szeretnél?"]},
     {"key": ["mitszeretszcsinalni", "szabadidoben", "hobbid", "mitszeretsz"], "answers": ["Sokat netezem, túl sokat 😅", "Szeretek csak így random csetelni emberekkel", "Zenét hallgatok, sorozat, semmi extra", "Ha jó a beszélgetőpartner, az elég 😁", "Ne kérdezz ilyen komolyakat 😄"]},
-    {"key": ["mivanha", "hamegtudnalkedni", "haottlennek"], "answers": ["Akkor lehet, elpirulnék 😳", "Hmm, érdekes lenne 😏", "Nem tudom, mit tennék... talán semmit, talán mindent", "Kiderülne, mennyire mersz közel jönni", "Talán csak beszélgetnénk... vagy nem csak 😘"]}
+    {"key": ["mivanha", "hamegtudnalkedni", "haottlennek"], "answers": ["Akkor lehet, elpirulnék 😳", "Hmm, érdekes lenne 😏", "Nem tudom, mit tennék... talán semmit, talán mindent", "Kiderülne, mennyire mersz közel jönni", "Talán csak beszélgetnénk... vagy nem csak 😘"]},
 	{"key": ["szia", "szio", "hali", "hi", "hello", "helo"], "answers": ["Szia", "Szió", "Hali", "Hello"]},
 	{"key": ["hogyvagy"], "answers": ["Jól, köszi!", "Minden oké!", "Remekül!"]},
 	{"key": ["micsi", "mizujs"], "answers": ["Semmi kulonoset, unalom van :))", "Minden oke", "Unalom", "Most ebredtem", "Masztizok :)"]},
