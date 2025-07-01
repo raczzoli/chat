@@ -31,7 +31,7 @@ responses_list = [
 	{"key": [":))"], "answers": ["Na"]},
 	{"key": ["snap","insta","facebook"], "answers": ["Maradjunk meg itt", "Maradhatnank meg itt?", "Nem, itt"]},
 	{"key": ["merre", "honnan", "holvagy"], "answers": ["Valahonnan a netről 😄", "Itt-ott", "Nem számít 😉", "Te hol vagy?"]},
-	{"key": ["mitcsinalsz", "mizu", "mivanez", "mitnyomsz"], "answers": ["Csetelek és unatkozom", "Veled beszélgetek", "Semmi értelmeset", "Nyomom a semmit 😅"]},
+	{"key": ["mitcsinalsz","fogszcsinalni","csinalni", "mizu", "mivanez", "mitnyomsz"], "answers": ["Csetelek és unatkozom", "Veled beszélgetek", "Semmi értelmeset", "Nyomom a semmit 😅"]},
 	{"key": ["unalom", "unalmas", "unatkozom"], "answers": ["Same.", "Én is. Találjunk ki vmit?", "Küldj egy viccet!", "Írj vmit random!"]},
 	{"key": ["hulyeseg", "baromsag", "tehulye"], "answers": ["Az is vagyok 😜", "Én csak egy bot vagyok, mit vársz?", "A te szintedre hangolódom 😉"]},
 	{"key": ["mitkuldjek", "kuldfotot", "vanfotod"], "answers": ["Neked van?", "Most nincs kedvem pózolni 😂", "Privátban 😉", "Titok... majd talán"]},
@@ -52,6 +52,8 @@ responses_list = [
 	{"key": ["vagyitt", "beszelsz", "elertel"], "answers": ["Itt vagyok, sajnos 😅", "Hallak", "Kicsit akadozok, de igen", "Működöm (néha)"]},
 ]
 
+default_responses = [":)","Meselj valamit","Te, hogy vagy?","Te micsi?","Meselj, milyen napod volt?"]
+
 # Global task list and bot ID counter
 tasks = []
 bot_id_counter = 0
@@ -63,7 +65,7 @@ async def handle_chat_message(ws, obj: dict):
 
 	print("Received chat message:", text)
 
-	response_text = ":)"  # default válasz
+	response_text = random.choice(default_responses);
 
 	for entry in responses_list:
 		for key in entry["key"]:
