@@ -42,7 +42,7 @@ async def handle_server_response(ws, raw: str):
 			}
 		}))
 		print("Sent response:", response)
-	else if command == "message":
+	elif command == "message":
 		await handle_chat_message(ws, params);
 	else:
 		print("Unknown command:", command)
