@@ -161,7 +161,8 @@ static void *bot_matcher_thread(void *arg)
 {
 	struct chat_thread_arg *t_arg = arg;
 	struct chat_client *client = t_arg->client;
-	struct waiting_room *room = NULL;
+	struct chat_context *ctx = client->chat_context;
+	struct waiting_room *client_room = client->room;
 
 	int seconds = (rand() % 4) + 1; // random number between 1 and 4
 	sleep(seconds);
@@ -178,16 +179,23 @@ static void *bot_matcher_thread(void *arg)
 	 * we look for bots, and pick the first one, and match
 	 * out client with that bot
 	 */
-	room = client->room;
-	struct chat_client *bot = find_match_in_room(room, 1);
+	struct chat_client *bot = find_match(ctx, client, 1);
 
 	/*
 	 * since we always have bots in waiting queues it shouldn`t happen
 	 * for "bot" to be NULL, but still checking it for safety
 	 */
 	if (bot) {
-		struct list_node *cnode = list_get_data_node(&room->queue, client);
-		list_remove_node(&room->queue, cnode);
+		/*
+		 * we check this only for safety, client_room shouldn`t be NULL, 
+		 * since our client doesn`t yet have a match (client->room is only
+		 * set to NULL when a client finds a match)
+		 */
+		if (client_room) { 
+			struct list_node *cnode = list_get_data_node(&client_room->queue, client);
+			list_remove_node(&client_room->queue, cnode);
+		}
+		
 		match_clients(client, bot);
 	}
 	else {
