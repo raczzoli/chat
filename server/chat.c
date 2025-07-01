@@ -306,6 +306,7 @@ static void client_read(ws_client_t *client, struct ws_data *data)
 					snprintf(resp_str, resp_len, "{\"command\":\"message\", \"params\":{\"source\":\"partner\", \"text\":\"%s\"}}", text_str);
 
 					ws_client_write_text(chat_client->pair->client, resp_str, strlen(resp_str));
+					printf("Msg from %s: %s\n", chat_client->client->ip, text_str);
 					free(resp_str);
 				}
 			}
