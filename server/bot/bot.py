@@ -23,6 +23,12 @@ bot_id_counter = 0
 
 async def handle_chat_message(ws, raw: dict):
 	print("Received chat message:", dict)
+	await ws.send(json.dumps({
+			"command": "message",
+			"params": {
+				"text": "hello world"
+			}
+		}))
 
 async def handle_server_response(ws, raw: str):
 	try:
@@ -35,12 +41,7 @@ async def handle_server_response(ws, raw: str):
 	params = data.get("params", {})
 
 	if command == "register-ok":
-		await ws.send(json.dumps({
-			"command": "message",
-			"params": {
-				"text": response
-			}
-		}))
+		pass
 	elif command == "message":
 		await handle_chat_message(ws, params);
 	else:
