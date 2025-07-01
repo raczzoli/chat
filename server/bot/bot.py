@@ -3,6 +3,7 @@ import asyncio
 import websockets
 import json
 import random
+import time
 
 # Uncomment to enable debug logging
 # import logging
@@ -30,7 +31,7 @@ async def handle_chat_message(ws, obj: dict):
 
     print("Received chat message:", text)
 
-    response_text = "Hmmm"  # default válasz
+    response_text = ":)"  # default válasz
 
     for entry in responses_list:
         for key in entry["key"]:
@@ -40,6 +41,8 @@ async def handle_chat_message(ws, obj: dict):
         else:
             continue
         break
+
+	await asyncio.sleep(random.uniform(3, 5))
 
     await ws.send(json.dumps({
         "command": "message",
