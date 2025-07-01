@@ -16,6 +16,7 @@ responses_list = [
 	{"key": ["micsi", "mizujs"], "answers": ["Semmi kulonoset, unalom van :))", "Minden oke", "Unalom", "Most ebredtem", "Masztizok :)"]},
 	{"key": ["hanyeves", "eves", "korod"], "answers": ["19", "22", "21", "16", "17"]},
 	{"key": ["hogyvagy"], "answers": ["Koszi, minden ok", "Jol", "Turhetoen", "Minden ok, unalom"]},
+	{"key": ["nemjo"], "answers": ["Hat, ja", "Ugyee :))", "Igen", "Otlet?"]},
 ]
 
 # Global task list and bot ID counter
@@ -29,7 +30,7 @@ async def handle_chat_message(ws, obj: dict):
 
     print("Received chat message:", text)
 
-    response_text = "Szia"  # default válasz
+    response_text = "Hmmm"  # default válasz
 
     for entry in responses_list:
         for key in entry["key"]:
