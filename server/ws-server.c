@@ -109,9 +109,12 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 	client->fd = accept(server->fd, (struct sockaddr*)&client->addr, &client->addr_len);
 
 	if (client->fd < 0) {
-		fprintf(stderr, "Error accepting websocket client!\n");
+		fprintf(stderr, "Error accepting websocket client (Code: %d, Error: %s)!\n", errno, strerror(errno));
 		goto err;
 	}
+
+	inet_ntop(AF_INET, &(client->addr.sin_addr), client->ip, INET_ADDRSTRLEN);
+	client->port = ntohs(client->addr.sin_port);
 
 	client->ssl = SSL_new(server->ssl_ctx);
 	SSL_set_fd(client->ssl, client->fd);
@@ -124,9 +127,6 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 		fprintf(stderr, "SSL handshake failed with client!\n");
 		goto err;
 	}
-
-	inet_ntop(AF_INET, &(client->addr.sin_addr), client->ip, INET_ADDRSTRLEN);
-	client->port = ntohs(client->addr.sin_port);
 
 	ret = handle_client_handshake(client);
 
