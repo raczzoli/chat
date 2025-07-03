@@ -167,10 +167,12 @@ static void start_client_thread(struct chat_context *ctx, struct chat_client *cl
 static void *chat_client_thread(void *arg)
 {
 	struct chat_thread_arg *t_arg = arg;
+	struct chat_client *client = t_arg->client;
 
-	ws_client_handle(t_arg->client->client);
+	free(arg);
+	t_arg = arg = NULL;
 
-	free(t_arg);
+	ws_client_handle(client->client);
 
 	return NULL;
 }
