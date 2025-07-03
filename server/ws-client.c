@@ -292,11 +292,8 @@ int ws_client_close(ws_client_t *client)
 
 	client->status = CLIENT_DISCONNECTED;
 
-	//close(client->fd);
-	//client->fd = -1;
-
 	if (client->ssl) {
-		if (!client->ssl_error || client->ssl_error != SSL_ERROR_SYSCALL) {
+		if (!client->ssl_error) {
 			/*
 			 * we only call SSL_shutdown if no ssl_error was set on client, 
 			 * or we have the client->ssl_error set, but it`s value is 
