@@ -148,7 +148,7 @@ static int ws_client_read_loop(ws_client_t *client)
 				client->ssl_error = SSL_get_error(client->ssl, ret);
 				ret = client->ssl_error;
 
-				fprintf(stderr, "Error reading from client (code: %d)!\n", ret);
+				fprintf(stderr, "Error reading from client with IP: %s (code: %d)!\n", client->ip, ret);
 				ERR_print_errors_fp(stderr);
 			}
 			
