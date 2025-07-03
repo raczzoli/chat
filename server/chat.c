@@ -209,6 +209,7 @@ void chat_init(struct chat_context *ctx)
 			client->ops.close = client_close;
 
 			ret = register_client(ctx, chat_cli);
+
 			if (ret) {
 				ws_client_close(client);
 				/*
