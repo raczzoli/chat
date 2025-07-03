@@ -161,7 +161,6 @@ static void start_client_thread(struct chat_context *ctx, struct chat_client *cl
 	arg->chat_context = ctx;
 
     pthread_create(&thread, NULL, chat_client_thread, arg);
-	pthread_join(thread, NULL);
 }
 
 static void *chat_client_thread(void *arg)
