@@ -142,6 +142,7 @@ static int ws_client_read_loop(ws_client_t *client)
 		}
 
 		bytes_read = SSL_read(client->ssl, buffer, MAX_WS_BUFFER_LEN);//recv(client->fd, buffer, MAX_WS_BUFFER_LEN, 0);
+		printf("Bytes read: %d\n", bytes_read);
 
 		if (bytes_read <= 0) { 
 			if (bytes_read < 0) { // err
@@ -301,7 +302,8 @@ int ws_client_close(ws_client_t *client)
 			 * closed the connection without doing the graceful shutdown
 			 * procedure so calling SSL_shutdown will trigger a SIGPIPE error
 			 */
-			SSL_shutdown(client->ssl);
+			int plm = SSL_shutdown(client->ssl);
+			printf("SSL shutdown ... %d\n", plm);
 		}
 		/*
 		 * we don`t do free here because in ws_client_read there is 
