@@ -149,12 +149,7 @@ end:
 
 static void start_client_thread(struct chat_context *ctx, struct chat_client *client)
 {
-	pthread_t *thread = (pthread_t *) malloc(sizeof(pthread_t));
-
-	if (!thread) {
-		// TODO: free client, close connection etc
-		return;
-	}
+	pthread_t thread;
 
 	struct chat_thread_arg *arg = malloc(sizeof(struct chat_thread_arg));
 	if (!arg) {
@@ -165,7 +160,8 @@ static void start_client_thread(struct chat_context *ctx, struct chat_client *cl
 	arg->client = client;
 	arg->chat_context = ctx;
 
-    pthread_create(thread, NULL, chat_client_thread, arg);
+    pthread_create(&thread, NULL, chat_client_thread, arg);
+	pthread_join(thread, NULL);
 }
 
 static void *chat_client_thread(void *arg)
