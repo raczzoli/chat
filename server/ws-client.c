@@ -348,9 +348,12 @@ void ws_client_free(ws_client_t *client)
 	}
 
 	/*
-	 * close socket
+	 * close socket (if valid)
 	 */
-	close(client->fd);
+	if (client->fd > -1) {
+		close(client->fd);
+		client->fd = -1;
+	}
 
 	pthread_mutex_destroy(&client->lock);
 

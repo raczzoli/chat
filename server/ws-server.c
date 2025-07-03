@@ -135,10 +135,8 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 	return client;
 
 err:
-	if (client) {
+	if (client) 
 		ws_client_free(client);
-		// TODO: close socket (i think)
-	}
 
 	return NULL;
 }
