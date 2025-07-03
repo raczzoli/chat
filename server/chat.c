@@ -55,6 +55,9 @@ struct chat_context *chat_create(struct ws_server_config config)
 
 	init_waiting_rooms(ctx);
 
+	// init clients lock
+	pthread_mutex_init(&ctx->clients_lock, NULL);
+
 	return ctx;
 }
 
@@ -511,7 +514,11 @@ static int add_client_to_waiting_room(struct chat_context *ctx, struct chat_clie
 
 static int register_client(struct chat_context *ctx, struct chat_client *client)
 {
+	pthread_mutex_lock(&ctx->clients_lock);
+
 	struct list_node *ret = list_add_node(&ctx->clients_head, client);
+
+	pthread_mutex_unlock(&ctx->clients_lock);
 
 	if (!ret) {
 		// TODO - maybe close the connection
@@ -552,9 +559,13 @@ static void remove_client_from_stacks(struct chat_context *ctx, struct chat_clie
 {
 	struct list_node *node = NULL;
 
+	pthread_mutex_lock(&ctx->clients_lock);
+
 	node = list_get_data_node(&ctx->clients_head, client);
 	if (node) 
 		list_remove_node(&ctx->clients_head, node);
+
+	pthread_mutex_unlock(&ctx->clients_lock);
 
 	if (client->room) {
 		node = list_get_data_node(&client->room->queue, client);
