@@ -304,6 +304,8 @@ int ws_client_close(ws_client_t *client)
 			 */
 			int plm = SSL_shutdown(client->ssl);
 			printf("SSL shutdown ... %d\n", plm);
+			plm = SSL_shutdown(client->ssl);
+			printf("Second SSL shutdown ... %d\n", plm);
 		}
 		/*
 		 * we don`t do free here because in ws_client_read there is 
