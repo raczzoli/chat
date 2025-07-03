@@ -34,7 +34,7 @@ struct chat_context {
 	struct waiting_room **waiting_rooms;
 	int waiting_rooms_len;
 
-	// locks
+	// mutexes
 	pthread_mutex_t clients_lock;
 };
 
@@ -43,6 +43,9 @@ struct waiting_room {
 	int looking_for;
 
 	struct list_node *queue;
+
+	// mutexes
+	pthread_mutex_t queue_lock;
 };
 
 struct chat_thread_arg {

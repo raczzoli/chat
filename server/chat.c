@@ -72,7 +72,9 @@ static int init_waiting_rooms(struct chat_context *ctx)
 	ctx->waiting_rooms_len = 0;
 	ctx->waiting_rooms = calloc(4, sizeof(struct waiting_room *));
 
-	// MALE : MALE
+	/*
+	 * 1. MALE : MALE
+	 */
 	room = malloc(sizeof(struct waiting_room));
 	if (!room) {
 		ret = -ENOMEM;
@@ -81,9 +83,14 @@ static int init_waiting_rooms(struct chat_context *ctx)
 	room->gender = GENDER_MALE;
 	room->looking_for = GENDER_MALE;
 	room->queue = NULL;
+	// queue lock
+	pthread_mutex_init(&room->queue_lock, NULL);
+
 	ctx->waiting_rooms[ctx->waiting_rooms_len++] = room;
 
-	// MALE : FEMALE
+	/*
+	 * 2. MALE : FEMALE
+	 */
 	room = malloc(sizeof(struct waiting_room));
 	if (!room) {
 		ret = -ENOMEM;
@@ -92,9 +99,14 @@ static int init_waiting_rooms(struct chat_context *ctx)
 	room->gender = GENDER_MALE;
 	room->looking_for = GENDER_FEMALE;
 	room->queue = NULL;
+	// queue lock
+	pthread_mutex_init(&room->queue_lock, NULL);
+
 	ctx->waiting_rooms[ctx->waiting_rooms_len++] = room;
 
-	// FEMALE : FEMALE
+	/*
+	 * 3. FEMALE : FEMALE
+	 */
 	room = malloc(sizeof(struct waiting_room));
 	if (!room) {
 		ret = -ENOMEM;
@@ -103,9 +115,14 @@ static int init_waiting_rooms(struct chat_context *ctx)
 	room->gender = GENDER_FEMALE;
 	room->looking_for = GENDER_FEMALE;
 	room->queue = NULL;
+	// queue lock
+	pthread_mutex_init(&room->queue_lock, NULL);
+
 	ctx->waiting_rooms[ctx->waiting_rooms_len++] = room;
 
-	// FEMALE : MALE
+	/*
+	 * 4. FEMALE : MALE
+	 */
 	room = malloc(sizeof(struct waiting_room));
 	if (!room) {
 		ret = -ENOMEM;
@@ -114,6 +131,9 @@ static int init_waiting_rooms(struct chat_context *ctx)
 	room->gender = GENDER_FEMALE;
 	room->looking_for = GENDER_MALE;
 	room->queue = NULL;
+	// queue lock
+	pthread_mutex_init(&room->queue_lock, NULL);
+
 	ctx->waiting_rooms[ctx->waiting_rooms_len++] = room;
 
 	goto end;
@@ -195,8 +215,12 @@ static void *bot_matcher_thread(void *arg)
 		 * set to NULL when a client finds a match)
 		 */
 		if (client_room) { 
+			pthread_mutex_lock(&client_room->queue_lock);
+
 			struct list_node *cnode = list_get_data_node(&client_room->queue, client);
 			list_remove_node(&client_room->queue, cnode);
+
+			pthread_mutex_unlock(&client_room->queue_lock);
 		}
 		
 		match_clients(client, bot);
@@ -447,14 +471,19 @@ static struct chat_client *find_match(struct chat_context *ctx, struct chat_clie
 
 static struct chat_client *find_match_in_room(struct waiting_room *room, int is_bot)
 {
-	if (!room || !room->queue)
-		return NULL;
-
-	// we have a match
-
-	struct list_node *found_node = NULL;
-	struct list_node *curr = room->queue;
+	struct chat_client *found_cli = NULL;
+	struct list_node *found_node, *curr = NULL;
 	struct chat_client *item = NULL;
+
+	if (!room) 
+		goto end;
+
+	pthread_mutex_lock(&room->queue_lock);
+
+	if (!room->queue)
+		goto end;
+
+	curr = room->queue;
 
 	do {
 		item = curr->data;
@@ -468,17 +497,18 @@ static struct chat_client *find_match_in_room(struct waiting_room *room, int is_
 	while (curr != room->queue);
 
 	if (!found_node)
-		return NULL;
+		goto end;
 
-	struct chat_client *found_cli = found_node->data;
+	found_cli = found_node->data;
 	list_remove_node(&room->queue, found_node);
 
 	if (found_cli) {
 		found_cli->room = NULL;
-		return found_cli;
 	}
 
-	return NULL;
+end:
+	pthread_mutex_unlock(&room->queue_lock);
+	return found_cli;
 }
 
 static int add_client_to_waiting_room(struct chat_context *ctx, struct chat_client *client)
@@ -496,7 +526,9 @@ static int add_client_to_waiting_room(struct chat_context *ctx, struct chat_clie
 	if (!room)
 		return -1;
 
+	pthread_mutex_lock(&room->queue_lock);
 	struct list_node *node = list_add_node(&room->queue, client);
+	pthread_mutex_unlock(&room->queue_lock);
 
 	if (!node) {
 		fprintf(stderr, "Error adding client with IP: %s to room (Gender: %d, looking for: %d)!\n", 
@@ -559,6 +591,8 @@ static void remove_client_from_stacks(struct chat_context *ctx, struct chat_clie
 {
 	struct list_node *node = NULL;
 
+
+	// removing client from main clients stack
 	pthread_mutex_lock(&ctx->clients_lock);
 
 	node = list_get_data_node(&ctx->clients_head, client);
@@ -567,13 +601,16 @@ static void remove_client_from_stacks(struct chat_context *ctx, struct chat_clie
 
 	pthread_mutex_unlock(&ctx->clients_lock);
 
+	// removing client from waiting room (if it is in one)
 	if (client->room) {
+		pthread_mutex_lock(&client->room->queue_lock);
+
 		node = list_get_data_node(&client->room->queue, client);
 		if (node) 
 			list_remove_node(&client->room->queue, node);
-	}
 
-	//ctx->waiting_rooms = NULL;
+		pthread_mutex_unlock(&client->room->queue_lock);
+	}
 }
 
 static void free_client(struct chat_client *client)
