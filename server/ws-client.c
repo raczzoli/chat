@@ -25,16 +25,6 @@ int ws_client_handle(ws_client_t *client)
 	ws_client_close(client);
 
 	/*
-	 * for why this is here and not in ws_client_close, 
-	 * read the comment in ws_client_close
-	 */
-	if (client->ssl) {
-		printf("Freeing client SSL...\n");
-		SSL_free(client->ssl);
-		client->ssl = NULL;
-	}
-
-	/*
 	 * at the end freeing the client itself
 	 */
 	if (client) 
@@ -339,8 +329,6 @@ end:
 
 void ws_client_free(ws_client_t *client)
 {
-	printf("Freeing client with port: %d\n", client->port);
-
 	if (client->headers) {
 		for (int i=0;i<client->headers_len;i++) {
 			struct http_header *header = client->headers[i];
@@ -357,7 +345,19 @@ void ws_client_free(ws_client_t *client)
 		client->headers = NULL;
 	}
 
+	if (client->ssl) {
+		SSL_free(client->ssl);
+		client->ssl = NULL;
+	}
+
+	/*
+	 * close socket
+	 */
+	close(client->fd);
+
 	pthread_mutex_destroy(&client->lock);
+
+	printf("Freed client with IP: %s\n", client->ip);
 
 	free(client);
 }
