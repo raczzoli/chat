@@ -305,6 +305,11 @@ int ws_client_close(ws_client_t *client)
 			int plm = SSL_shutdown(client->ssl);
 			printf("SSL shutdown ... %d\n", plm);
 			plm = SSL_shutdown(client->ssl);
+
+			if (plm < 0) {
+				plm = SSL_get_error(client->ssl, ret);
+			}
+
 			printf("Second SSL shutdown ... %d\n", plm);
 		}
 		/*
