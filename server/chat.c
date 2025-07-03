@@ -210,7 +210,12 @@ void chat_init(struct chat_context *ctx)
 
 			ret = register_client(ctx, chat_cli);
 			if (ret) {
-				free_client(chat_cli);
+				ws_client_close(client);
+				/*
+				 * in this case we can call ws_client_free
+				 * immediatly after close because we don`t have 
+				 * and SSL_read ops in progress
+				 */
 				ws_client_free(client);
 				return;
 			}
