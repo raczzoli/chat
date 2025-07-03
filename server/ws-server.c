@@ -122,7 +122,6 @@ ws_client_t *ws_server_accept(ws_server_t *server)
 	if (SSL_accept(client->ssl) <= 0) {
 		// SSL handshake failed
 		ERR_print_errors_fp(stderr);
-		SSL_free(client->ssl);
 
 		fprintf(stderr, "SSL handshake failed with client!\n");
 		goto err;
