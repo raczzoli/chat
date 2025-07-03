@@ -210,8 +210,8 @@ void chat_init(struct chat_context *ctx)
 
 			ret = register_client(ctx, chat_cli);
 			if (ret) {
-				// TODO close client connection
-				free(chat_cli);
+				free_client(chat_cli);
+				ws_client_free(client);
 				return;
 			}
 
@@ -454,9 +454,7 @@ static int add_client_to_waiting_room(struct chat_context *ctx, struct chat_clie
 static int register_client(struct chat_context *ctx, struct chat_client *client)
 {
 	pthread_mutex_lock(&ctx->clients_lock);
-
 	struct list_node *ret = list_add_node(&ctx->clients_head, client);
-
 	pthread_mutex_unlock(&ctx->clients_lock);
 
 	if (!ret) {
