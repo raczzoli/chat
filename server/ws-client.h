@@ -12,6 +12,7 @@
 #define MAX_WS_BUFFER_LEN 71680 
 #define MAX_WS_PAYLOAD_LEN 65535
 
+#define WEBSOCKET_MAGIC "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
 typedef struct ws_client ws_client_t;
 
@@ -62,6 +63,7 @@ struct ws_frame {
 };
 
 int ws_client_handle(ws_client_t *client);
+int ws_client_do_handshake(ws_client_t *client);
 
 int ws_client_write_text(ws_client_t *client, char *text, uint64_t len);
 

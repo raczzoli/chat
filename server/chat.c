@@ -11,7 +11,7 @@
 #include "list.h"
 #include "jansson.h"
 
-static void start_client_thread(struct chat_context *ctx, struct chat_client *client);
+static void start_client_thread(struct chat_context *ctx, struct ws_client *client);
 static void *chat_client_thread(void *arg);
 
 static int init_waiting_rooms(struct chat_context *ctx);
@@ -147,9 +147,51 @@ end:
 	return ret;
 }
 
-static void start_client_thread(struct chat_context *ctx, struct chat_client *client)
+static void start_client_thread(struct chat_context *ctx, struct ws_client *client)
 {
+	int ret = 0;
+	struct chat_client *chat_cli = NULL;
 	pthread_t thread;
+	
+	ret = ws_client_do_handshake(client);
+	
+	if (ret) {
+		ws_client_free(client);
+		return;
+	}
+
+	chat_cli = malloc(sizeof(struct chat_client));
+
+	if (!chat_cli) {
+		// TODO close client connection
+		fprintf(stderr, "Error allocating memory for chat_client struct!\n");
+		return;
+	}
+
+	chat_cli->registered = 0;
+	chat_cli->client = client;
+	chat_cli->chat_context = ctx;
+	chat_cli->pair = NULL;
+	chat_cli->room = NULL;
+
+	printf("Client registered - IP: %s, port: %d...\n", chat_cli->client->ip, chat_cli->client->port);
+
+	client->owner = (void *)chat_cli;
+	client->ops.read = client_read;
+	client->ops.close = client_close;
+
+	ret = register_client(ctx, chat_cli);
+
+	if (ret) {
+		ws_client_close(client);
+		/*
+			* in this case we can call ws_client_free
+			* immediatly after close because we don`t have 
+			* and SSL_read ops in progress
+			*/
+		ws_client_free(client);
+		return;
+	}
 
 	struct chat_thread_arg *arg = malloc(sizeof(struct chat_thread_arg));
 	if (!arg) {
@@ -157,7 +199,7 @@ static void start_client_thread(struct chat_context *ctx, struct chat_client *cl
 		return;
 	}
 
-	arg->client = client;
+	arg->client = chat_cli;
 	arg->chat_context = ctx;
 
     pthread_create(&thread, NULL, chat_client_thread, arg);
@@ -179,47 +221,13 @@ static void *chat_client_thread(void *arg)
 
 void chat_init(struct chat_context *ctx)
 {
-	int ret = 0;
 	ws_client_t *client = NULL;
 
 	while (1) {
 		client = ws_server_accept(ctx->server);
 
 		if (client) {
-			struct chat_client *chat_cli = malloc(sizeof(struct chat_client));
-
-			if (!chat_cli) {
-				// TODO close client connection
-				fprintf(stderr, "Error allocating memory for chat_client struct!\n");
-				return;
-			}
-
-			chat_cli->registered = 0;
-			chat_cli->client = client;
-			chat_cli->chat_context = ctx;
-			chat_cli->pair = NULL;
-			chat_cli->room = NULL;
-
-			printf("Client registered - IP: %s, port: %d...\n", chat_cli->client->ip, chat_cli->client->port);
-
-			client->owner = (void *)chat_cli;
-			client->ops.read = client_read;
-			client->ops.close = client_close;
-
-			ret = register_client(ctx, chat_cli);
-
-			if (ret) {
-				ws_client_close(client);
-				/*
-				 * in this case we can call ws_client_free
-				 * immediatly after close because we don`t have 
-				 * and SSL_read ops in progress
-				 */
-				ws_client_free(client);
-				return;
-			}
-
-			start_client_thread(ctx, chat_cli);
+			start_client_thread(ctx, client);
 		}
 	}
 }

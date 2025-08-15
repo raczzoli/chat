@@ -6,10 +6,11 @@
 
 #include "r89.h"
 #include "ws-client.h"
+#include "base64.h"
 
 static int parse_frame(struct ws_frame *frame, char **buffer);
 static int ws_client_read_loop(ws_client_t *client);
-
+static int parse_http_headers(ws_client_t *client, char *buffer);
 
 int ws_client_handle(ws_client_t *client)
 {
@@ -29,6 +30,80 @@ int ws_client_handle(ws_client_t *client)
 	 */
 	if (client) 
 		ws_client_free(client);
+
+	return 0;
+}
+
+int ws_client_do_handshake(ws_client_t *client)
+{
+	int ret = 0;
+	int bytes_read = 0;
+	int bytes_sent = 0;
+	char buffer[MAX_BUFFER_LEN];
+	char *wss_req_key = NULL;
+	char wss_resp_key[MAX_BUFFER_LEN];
+	unsigned char resp_key_hash[SHA_DIGEST_LENGTH];
+	char *resp_key_base64;
+
+	memset(buffer, 0, MAX_BUFFER_LEN);
+	bytes_read = SSL_read(client->ssl, buffer, MAX_BUFFER_LEN-1);
+
+	if (bytes_read <= 0) {
+		ret = SSL_get_error(client->ssl, ret);
+		fprintf(stderr, "Error reading handshake request from client or the client unexpectedly closed the connection (code: %d)!\n", ret);
+		ERR_print_errors_fp(stderr);
+		
+		return ret;
+	}
+
+	ret = parse_http_headers(client, buffer);
+
+	if (ret) {
+		fprintf(stderr, "Error parsing handshake request headers!\n");
+		return -1;
+	}
+
+	for (int i=0;i<client->headers_len;i++) {
+		struct http_header *hdr = client->headers[i];
+
+		if (hdr->key && strstr(hdr->key, "Sec-WebSocket-Key") != NULL) {
+			wss_req_key = hdr->value;
+			break;
+		}
+	}
+
+	if (!wss_req_key) {
+		fprintf(stderr, "Sec-WebSocket-Key header was not sent by the client!\n");
+		return -1;
+	}
+
+	/*
+	 * computing Sec-WebSocket-Accept key for handshake response:
+	 * Sec-WebSocket-Accept = base64(sha1(Sec-WebSocket-Key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"))
+	 */
+	snprintf(wss_resp_key, sizeof(wss_resp_key), "%s%s", wss_req_key, WEBSOCKET_MAGIC);
+	SHA1((unsigned char *)wss_resp_key, strlen(wss_resp_key), resp_key_hash);
+
+	resp_key_base64 = base64_encode((const unsigned char *)resp_key_hash, SHA_DIGEST_LENGTH);
+
+	//printf("plain: %s\n", wss_resp_key);
+	//printf("base64: %s\n", resp_key_base64);
+
+	snprintf(buffer, MAX_BUFFER_LEN,
+		"HTTP/1.1 101 Switching Protocols\r\n"
+		"Upgrade: websocket\r\n"
+		"Connection: Upgrade\r\n"
+		"Sec-WebSocket-Accept: %s\r\n"
+		"\r\n", resp_key_base64);
+
+	free(resp_key_base64);
+
+	bytes_sent = SSL_write(client->ssl, buffer, strlen(buffer));//send(client->fd, buffer, buffer_len, 0);
+
+	if (bytes_sent <= 0) {
+		fprintf(stderr, "Error sending handshake response to client (send() return code: %d)!\n", bytes_sent);
+		return -1;
+	}
 
 	return 0;
 }
@@ -219,8 +294,10 @@ static int ws_client_read_loop(ws_client_t *client)
 					if (frame.is_fin > 0) 
 						client->ops.read(client, &data);
 				
-					free(data.payload);
-					data.payload = NULL;
+					if (data.payload) {
+						free(data.payload);
+						data.payload = NULL;
+					}
 				break;
 
 				case 0x8:
@@ -253,6 +330,7 @@ static int ws_client_read_loop(ws_client_t *client)
 						}
 
 						SSL_write(client->ssl, pong_buff, pong_size);
+						free(pong_buff);
 					}
 				}
 				break;
@@ -360,6 +438,57 @@ void ws_client_free(ws_client_t *client)
 	printf("Freed client with IP: %s\n", client->ip);
 
 	free(client);
+}
+
+static int parse_http_headers(ws_client_t *client, char *buffer)
+{
+	struct http_header *header;
+	char *line;
+	char *colon, *val;
+
+	line = strtok(buffer, "\r\n");
+
+	while (line != NULL) {
+		colon = strchr(line, ':');
+
+		if (colon) {
+			header = malloc(sizeof(struct http_header));
+			if (!header)
+				return -ENOMEM;
+
+			// key
+			int key_len = colon - line;
+			header->key = strndup(line, key_len);
+
+			val = colon + 1; // ":"
+
+			// skipping any whitespaces around ":"
+			while (*val == ' ')
+				val++;
+
+			// value
+			header->value = strndup(val, strlen(val));
+
+			if (client->headers_len < 1)
+				client->headers = calloc(1, sizeof(struct http_header *));
+			else 
+				client->headers = realloc(client->headers, (client->headers_len+1) * sizeof(struct http_header *));
+
+			if (!client->headers) {
+				free(header->key);
+				free(header->value);
+				free(header);
+
+				return -ENOMEM;
+			}
+
+			client->headers[client->headers_len++] = header;
+		}
+
+		line = strtok(NULL, "\r\n");
+	}
+
+	return 0;
 }
 
 static int parse_frame(struct ws_frame *frame, char **buffer)
