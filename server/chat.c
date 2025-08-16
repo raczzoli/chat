@@ -149,15 +149,35 @@ end:
 
 static void start_client_thread(struct chat_context *ctx, struct ws_client *client)
 {
-	int ret = 0;
-	struct chat_client *chat_cli = NULL;
 	pthread_t thread;
+	struct chat_thread_arg *arg = malloc(sizeof(struct chat_thread_arg));
+	
+	if (!arg) {
+		// TODO: free client, close connection etc
+		return;
+	}
+
+	arg->client = client;
+	arg->chat_context = ctx;
+
+    pthread_create(&thread, NULL, chat_client_thread, arg);
+	pthread_detach(thread);
+}
+
+static void *chat_client_thread(void *arg)
+{
+	int ret = 0;
+	struct chat_thread_arg *t_arg = arg;
+	struct ws_client *client = t_arg->client;
+	struct chat_context *ctx = t_arg->chat_context;
+
+	struct chat_client *chat_cli = NULL;
 	
 	ret = ws_client_do_handshake(client);
 	
 	if (ret) {
 		ws_client_free(client);
-		return;
+		return NULL;
 	}
 
 	chat_cli = malloc(sizeof(struct chat_client));
@@ -165,7 +185,7 @@ static void start_client_thread(struct chat_context *ctx, struct ws_client *clie
 	if (!chat_cli) {
 		// TODO close client connection
 		fprintf(stderr, "Error allocating memory for chat_client struct!\n");
-		return;
+		return NULL;
 	}
 
 	chat_cli->registered = 0;
@@ -190,31 +210,13 @@ static void start_client_thread(struct chat_context *ctx, struct ws_client *clie
 			* and SSL_read ops in progress
 			*/
 		ws_client_free(client);
-		return;
+		return NULL;
 	}
-
-	struct chat_thread_arg *arg = malloc(sizeof(struct chat_thread_arg));
-	if (!arg) {
-		// TODO: free client, close connection etc
-		return;
-	}
-
-	arg->client = chat_cli;
-	arg->chat_context = ctx;
-
-    pthread_create(&thread, NULL, chat_client_thread, arg);
-	pthread_detach(thread);
-}
-
-static void *chat_client_thread(void *arg)
-{
-	struct chat_thread_arg *t_arg = arg;
-	struct chat_client *client = t_arg->client;
 
 	free(arg);
 	t_arg = arg = NULL;
 
-	ws_client_handle(client->client);
+	ws_client_handle(client);
 
 	return NULL;
 }

@@ -48,7 +48,7 @@ struct waiting_room {
 };
 
 struct chat_thread_arg {
-	struct chat_client *client;
+	struct ws_client *client;
 	struct chat_context *chat_context;
 };
 
